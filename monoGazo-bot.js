@@ -32,16 +32,24 @@ const subscription = observable.subscribe((packet) => {
   if(packet.event.content==="もの画像"||packet.event.content==="mono画像"){
     const urlIndex = Math.floor(Math.random()*urlList.length);
     console.log("ものがぞうりくえすときました:"+urlIndex);
-
-    const res=rxNostr.send({
-      kind:1,
-      content:`#もの画像\n${urlList[urlIndex].url}\n作：nostr:${urlList[urlIndex].author} ${urlList[urlIndex].memo?" ("+urlList[urlIndex].memo+")":""}`,
-      tags:[
+    const tags= [
       ["p",packet.event.pubkey],
       ["e",packet.event.id],
       ["r",urlList[urlIndex].url],
-      ["t","もの画像"]
-      ],
+      ["t","もの画像"]];
+
+      const root = packet.event.tags.find((item) => item[item.length - 1] === "root");
+
+      // rootが見つかった場合、tagsにrootを追加
+      if (root) {
+        tags.push(root);
+      }
+    console.log(tags);
+
+    const res=rxNostr.send({
+      kind:packet.event.kind,
+      content:`#もの画像\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} ${urlList[urlIndex].memo?" ("+urlList[urlIndex].memo+")":""}`,
+      tags:tags,
       pubkey:npub,
     },{seckey:nsec}).subscribe({
       next:({from}) =>{
@@ -55,4 +63,4 @@ const subscription = observable.subscribe((packet) => {
 });
 
 // Send REQ message to listen kind1 events
-rxReq.emit({ kinds: [1] ,since:now });
+rxReq.emit({ kinds: [1,42] ,since:now });

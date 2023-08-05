@@ -208,7 +208,8 @@ export const urlList=[
     },
     {
         url: "https://nostr.build/i/b74101d63df81a7add557c539a852d771e60aeed7e92af0abc16c744453f1963.jpg",
-        author: "npub14sw26a7wvglnywzurts9nl09g93hs6xvhqdexjppp66ykyd6f7ws80gdjg"
+        author: "npub14sw26a7wvglnywzurts9nl09g93hs6xvhqdexjppp66ykyd6f7ws80gdjg",
+        memo:"何もわからんかも水族館"
     },
     {
         url: "https://cdn.nostr.build/i/a97bb2a8c1bfdd4566f8e178983f532f553c268879f54cb318d85418e6cbfa6d.jpg",
