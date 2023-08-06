@@ -177,7 +177,6 @@ export const urlList=[
         author: "npub14sw26a7wvglnywzurts9nl09g93hs6xvhqdexjppp66ykyd6f7ws80gdjg"
     },
     {
-
         url: "https://nostr.build/i/589869453c214f8a07a4d5da4b82fefe73dfdc63fabc5976f36d5282dbdce9e8.jpg",
         author: "npub14sw26a7wvglnywzurts9nl09g93hs6xvhqdexjppp66ykyd6f7ws80gdjg"
     },
@@ -192,7 +191,7 @@ export const urlList=[
     {
 
         url: "https://nostr.build/i/0f0c9a6fe5b9fa7503e2241de76a14b31d238f6cfc626bcf4f27176ee2659f60.jpg",
-        aurhor: "npub14sw26a7wvglnywzurts9nl09g93hs6xvhqdexjppp66ykyd6f7ws80gdjg"
+        author: "npub14sw26a7wvglnywzurts9nl09g93hs6xvhqdexjppp66ykyd6f7ws80gdjg"
     },
     {
         url: "https://nostr.build/i/2e240a4f1442ddbd02ec55216f9d0ac63ceeb078b1f474b6d1fc72ae928db176.jpg",
@@ -238,5 +237,13 @@ export const urlList=[
     {
         url: "https://nostr.build/i/3eac288427c91a48fa172cd86c305a105490a1ade85c1e60a54c01dddd7278ec.jpg",
         author: "npub1uz5vh467hljwlwag5e0l2ja5xkzcgp8kms96ffj93gjd0ajz692qv3ucfc"
+    },
+    {
+        url:"https://cdn.nostr.build/i/41fcb24293631858411aefab410ad78c4912d36b23eb75617e3dcb1ff9260289.png",
+        author:"npub14sw26a7wvglnywzurts9nl09g93hs6xvhqdexjppp66ykyd6f7ws80gdjg"
+    },
+    {
+        url:"https://cdn.nostr.build/i/8468d145da7d8b9b02cf9b64b2d8337caa43c797f3c1e73eb34ef00228a0f6f7.png",
+        author:"npub14sw26a7wvglnywzurts9nl09g93hs6xvhqdexjppp66ykyd6f7ws80gdjg"
     }
 ];
