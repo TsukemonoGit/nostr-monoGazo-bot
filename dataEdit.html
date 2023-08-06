@@ -1,0 +1,35 @@
+<!-- HTMLフォーム -->
+<form id="dataForm">
+    <input type="text" id="urlInput" placeholder="URL">
+    <input type="text" id="authorInput" placeholder="Author">
+    <button type="submit">追加</button>
+  </form>
+  
+  <script>
+    // 既存のデータ配列
+    export const data = [
+      { url: "example1.com", author: "John" },
+      { url: "example2.com", author: "Jane" },
+      // 他のデータ
+    ];
+  
+    // フォームのsubmitイベントを処理
+    document.getElementById("dataForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+  
+      // フォームから値を取得
+      const url = document.getElementById("urlInput").value;
+      const author = document.getElementById("authorInput").value;
+  
+      // 新しいデータオブジェクトを作成
+      const newData = { url, author };
+  
+      // 新しいデータをdata配列に追加
+      data.push(newData);
+  
+      // データを保存するなどの処理
+      // ...
+  
+      console.log(data); // 更新されたデータ配列を表示
+    });
+  </script>
