@@ -245,5 +245,9 @@ export const urlList=[
     {
         url:"https://cdn.nostr.build/i/8468d145da7d8b9b02cf9b64b2d8337caa43c797f3c1e73eb34ef00228a0f6f7.png",
         author:"npub14sw26a7wvglnywzurts9nl09g93hs6xvhqdexjppp66ykyd6f7ws80gdjg"
+    },
+    {
+        url:"https://imgproxy.iris.to/insecure/plain/https://millie-may.net/nostr/0413monosan.jpg",
+        author:"npub1ewfds8776uszff507rnf820xkdtg03tqgz58sr7h8xkxy28elhjs3hydvy"
     }
 ];
