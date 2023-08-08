@@ -212,7 +212,7 @@ function monoLen(packet) {
   // console.log(packet.event.created_at + 1);
   //const created_at = packet.event.created_at + 1;
 
-  postEvent(packet.event.kind, `もの画像は今全部で${urlList.length-1}枚あるよ`, tags,packet.event.created_at + 1);
+  postEvent(packet.event.kind, `もの画像は今全部で${urlList.length}枚あるよ`, tags,packet.event.created_at + 1);
 }
 
 
