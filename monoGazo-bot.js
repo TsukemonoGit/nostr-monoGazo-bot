@@ -2,9 +2,10 @@ import 'websocket-polyfill'
 import { createRxNostr, createRxForwardReq, verify, uniq, now } from "rx-nostr";
 import env from "dotenv";
 env.config();
-import { urlList } from './imageList.js';
+//import { urlList } from './imageList.js';   //JSを読み込む方
 
-
+import {readFile} from 'fs/promises'
+const urlList=JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
 
 const nsec = process.env.NSEC;
 const npub = process.env.PUBHEX;
