@@ -1,4 +1,5 @@
 //JSONとどっちか使いやすい方
+//JSONにする！
 export const urlList=[
     {
         url: "https://stok33.github.io/illust/jiho.png",
