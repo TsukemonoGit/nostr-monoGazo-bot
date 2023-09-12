@@ -12,6 +12,8 @@ import { readFile, writeFile } from 'fs/promises'
 const urlList = JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
 
 const scriptPath=process.env.SCRIPTPATH;
+const gitName = process.env.GITNAME;
+const gitEmail = process.env.GITEMAIL;
 const nsec = process.env.NSEC;
 const npub = process.env.PUBHEX;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
@@ -473,9 +475,11 @@ async function gitPush(){
    const currentDate = new Date().toISOString().slice(0, 10);
 try{
    // git コマンドを同期的に実行
-   execSync('git add .');
-   execSync(`git commit -m "${currentDate}"`);
-   execSync('git push origin main');
+   execSync(`sudo git config user.name "${gitName}"`);
+   execSync(`sudo git config user.email "${gitEmail}"`);
+   execSync('sudo git add .');
+   execSync(`sudo git commit -m "${currentDate}"`);
+   execSync('sudo git push origin main');
  
    console.log(`Successfully committed and pushed to main branch.`);
  } catch (error) {
