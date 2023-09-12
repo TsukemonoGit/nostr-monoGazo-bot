@@ -11,6 +11,7 @@ import { execSync } from 'child_process';
 import { readFile, writeFile } from 'fs/promises'
 
 const urlList = JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
+
 const octokit = new Octokit({
   auth: `${process.env.TOKEN}`
 });
@@ -251,14 +252,14 @@ const subscription = observable.subscribe(async (packet) => {
               // postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
            
               //コミットとプッシュ
-              await octokit.request('GET /repos/TsukemonoGit/nostr-monoGazo-bot/actions/runs/6161521514', {
-                owner: 'TsukemonoGit',
-                repo: 'nostr-monoGazo-bot',
-                run_id: '6161521514',
+              await octokit.request('POST /repos/TsukemonoGit/nostr-monoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
+                ref: 'main',
+               
                 headers: {
-                  'X-GitHub-Api-Version': '2022-11-28'
-                }
-              })
+                  'Accept': 'application/vnd.github.v3+json'
+                      }
+                  })
+              
               // await octokit.request('POST /repos/TsukemonoGit/nostr-nomoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
               //   ref: 'main',
                
@@ -312,14 +313,14 @@ const subscription = observable.subscribe(async (packet) => {
                 //   await gitPush();
                 //   postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
                  //コミットとプッシュ
-                 await octokit.request('GET /repos/TsukemonoGit/nostr-monoGazo-bot/actions/runs/6161521514', {
-                  owner: 'TsukemonoGit',
-                  repo: 'nostr-monoGazo-bot',
-                  run_id: '6161521514',
+                 await octokit.request('POST /repos/TsukemonoGit/nostr-monoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
+                  ref: 'main',
+                 
                   headers: {
-                    'X-GitHub-Api-Version': '2022-11-28'
-                  }
-                })
+                    'Accept': 'application/vnd.github.v3+json'
+                        }
+                    })
+                
               // await octokit.request('POST /repos/TsukemonoGit/nostr-nomoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
               //   ref: 'main',
                
