@@ -12,16 +12,15 @@ on:
   permissions:
     contents:write
 
-  jobs:
+jobs:
   run:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v3
 
-      - uses: snow-actions/git-config-user@v1.0.0
-
       - name: Commit&Push
+      - uses: snow-actions/git-config-user@v1.0.0
       - run: |
           set -x
           git config --global user.email ${{ secrets.USER_EMAIL }}
