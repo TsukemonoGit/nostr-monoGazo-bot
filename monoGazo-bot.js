@@ -249,16 +249,24 @@ const subscription = observable.subscribe(async (packet) => {
               //コミットとプッシュ
               // await gitPush();
               // postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
-
+           
               //コミットとプッシュ
-              await octokit.request('POST /repos/TsukemonoGit/nostr-nomoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
-                ref: 'main',
-
+              await octokit.request('GET /repos/TsukemonoGit/nostr-monoGazo-bot/actions/runs/6161521514', {
+                owner: 'TsukemonoGit',
+                repo: 'nostr-monoGazo-bot',
+                run_id: '6161521514',
                 headers: {
-                  'Accept': 'application/vnd.github.v3+json'
+                  'X-GitHub-Api-Version': '2022-11-28'
                 }
               })
-
+              // await octokit.request('POST /repos/TsukemonoGit/nostr-nomoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
+              //   ref: 'main',
+               
+              //   headers: {
+              //     'Accept': 'application/vnd.github.v3+json'
+              //         }
+              //     })
+              
             } catch (error) {
               postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
             }
@@ -303,15 +311,23 @@ const subscription = observable.subscribe(async (packet) => {
                 //   //コミットとプッシュ
                 //   await gitPush();
                 //   postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
-                //コミットとプッシュ
-                await octokit.request('POST /repos/TsukemonoGit/nostr-nomoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
-                  ref: 'main',
-
+                 //コミットとプッシュ
+                 await octokit.request('GET /repos/TsukemonoGit/nostr-monoGazo-bot/actions/runs/6161521514', {
+                  owner: 'TsukemonoGit',
+                  repo: 'nostr-monoGazo-bot',
+                  run_id: '6161521514',
                   headers: {
-                    'Accept': 'application/vnd.github.v3+json'
+                    'X-GitHub-Api-Version': '2022-11-28'
                   }
                 })
-
+              // await octokit.request('POST /repos/TsukemonoGit/nostr-nomoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
+              //   ref: 'main',
+               
+              //   headers: {
+              //     'Accept': 'application/vnd.github.v3+json'
+              //         }
+              //     })
+              
               } catch (error) {
                 postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
               }
