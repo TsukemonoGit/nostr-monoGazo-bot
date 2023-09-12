@@ -6,4 +6,4 @@ git config --global --add safr.directory /home/mono/documents/nostr/nostr-monoGa
 
 git add .
 git commit -m $d
-git push origin main
+git push origin test
