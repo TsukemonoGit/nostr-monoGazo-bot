@@ -8,8 +8,7 @@ on:
       - .github/workflows/gitPush.yml
   workflow_dispatch:
 
-permissions:
-  contents: write
+
 
 jobs:
   run:
