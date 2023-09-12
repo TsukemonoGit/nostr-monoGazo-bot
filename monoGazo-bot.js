@@ -260,13 +260,7 @@ const subscription = observable.subscribe(async (packet) => {
                       }
                   })
               
-              // await octokit.request('POST /repos/TsukemonoGit/nostr-nomoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
-              //   ref: 'main',
-               
-              //   headers: {
-              //     'Accept': 'application/vnd.github.v3+json'
-              //         }
-              //     })
+            
               
             } catch (error) {
               postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
@@ -321,13 +315,7 @@ const subscription = observable.subscribe(async (packet) => {
                         }
                     })
                 
-              // await octokit.request('POST /repos/TsukemonoGit/nostr-nomoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
-              //   ref: 'main',
-               
-              //   headers: {
-              //     'Accept': 'application/vnd.github.v3+json'
-              //         }
-              //     })
+            
               
               } catch (error) {
                 postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
