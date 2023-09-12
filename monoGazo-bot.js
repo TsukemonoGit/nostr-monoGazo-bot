@@ -5,6 +5,7 @@ import env from "dotenv";
 env.config();
 //import { urlList } from './imageList.js';   //JSを読み込む方
 import { exec } from 'child_process'
+const { execSync } = require('child_process');
 //const { exec } = require('child_process')
 import { readFile, writeFile } from 'fs/promises'
 
