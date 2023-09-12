@@ -5,7 +5,7 @@ import env from "dotenv";
 env.config();
 //import { urlList } from './imageList.js';   //JSを読み込む方
 import { exec } from 'child_process'
-const { execSync } = require('child_process');
+import  { execSync } from 'child_process';
 //const { exec } = require('child_process')
 import { readFile, writeFile } from 'fs/promises'
 
@@ -242,19 +242,13 @@ const subscription = observable.subscribe(async (packet) => {
             // ];
             // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
             // postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[]);
-            //コミットとプッシュ
-            exec(`sh ${scriptPath}/gitPush.sh`, (err, stdout, stderr) => {
-              if (err) {
-                console.log(`stderr: ${stderr}`)
-                //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
-                postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
-                return
-              }
-              console.log(`stdout: ${stdout}`)
-              // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
+            try{
+              //コミットとプッシュ
+              await gitPush();
               postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
-
-            })
+             }catch(error){
+              postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
+             }
 
           } catch (error) {
             // const tags = [
@@ -291,20 +285,15 @@ const subscription = observable.subscribe(async (packet) => {
             urlList.splice(numericValue, 1);
             try {
               await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
-
+             
+             try{
               //コミットとプッシュ
-              exec(`sh ${scriptPath}/gitPush.sh`, (err, stdout, stderr) => {
-                if (err) {
-                  console.log(`stderr: ${stderr}`)
-                  //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
-                  postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
-                  return
-                }
-                console.log(`stdout: ${stdout}`)
-                // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
-                postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
-
-              })
+              await gitPush();
+              postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
+             }catch(error){
+              postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
+             }
+             
             } catch (error) {
               postRepEvent(packet.event, "₍ xᴗx ₎", [])
             }
@@ -474,4 +463,24 @@ function atirakara(pubkey, packet) {
   //元note: note1hd5rumpdyhc6dm5p3q8ryu5l622jcvd90wk6zpc80834s623rexsgv6mdn
   postEvent(packet.event.kind, `nostr:${nip19.npubEncode(pubkey)} あちらのお客様からです\nあるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像\nnostr:${nip19.noteEncode(packet.event.id)}`, tags, Math.max(packet.event.created_at + 1, now()));
 
+}
+
+
+async function gitPush(){
+   // 指定されたディレクトリに移動
+   process.chdir(scriptPath);
+   // 日付を取得
+   const currentDate = new Date().toISOString().slice(0, 10);
+try{
+   // git コマンドを同期的に実行
+   execSync('git add .');
+   execSync(`git commit -m "${currentDate}"`);
+   execSync('git push origin main');
+ 
+   console.log(`Successfully committed and pushed to main branch.`);
+ } catch (error) {
+  throw new Error(error);
+   //console.error(`Error: ${error.message}`);
+   //process.exit(1); // エラーコードでプロセスを終了
+ } 
 }
