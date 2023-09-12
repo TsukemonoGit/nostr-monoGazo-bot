@@ -239,7 +239,21 @@ const subscription = observable.subscribe(async (packet) => {
             //   ["e", packet.event.id]
             // ];
             // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
-            postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[])
+           // postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[]);
+            //コミットとプッシュ
+            exec('gitPush.sh', (err, stdout, stderr) => {
+              if (err) {
+                console.log(`stderr: ${stderr}`)
+              //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
+                postRepEvent(packet.event,"₍ ･ᴗx ₎",[])
+                return
+              }
+              console.log(`stdout: ${stdout}`)
+             // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
+              postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[])
+
+            })
+
           } catch (error) {
             // const tags = [
             //   ["p", packet.event.pubkey],
