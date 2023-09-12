@@ -241,7 +241,7 @@ const subscription = observable.subscribe(async (packet) => {
             // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
             // postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[]);
             //コミットとプッシュ
-            exec('sh gitPush.sh', (err, stdout, stderr) => {
+            exec('sudo sh ./gitPush.sh', (err, stdout, stderr) => {
               if (err) {
                 console.log(`stderr: ${stderr}`)
                 //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
@@ -291,7 +291,7 @@ const subscription = observable.subscribe(async (packet) => {
               await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
 
               //コミットとプッシュ
-              exec('sh gitPush.sh', (err, stdout, stderr) => {
+              exec('sudo sh gitPush.sh', (err, stdout, stderr) => {
                 if (err) {
                   console.log(`stderr: ${stderr}`)
                   //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
