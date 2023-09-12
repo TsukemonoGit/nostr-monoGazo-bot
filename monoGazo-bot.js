@@ -10,6 +10,7 @@ import { readFile, writeFile } from 'fs/promises'
 
 const urlList = JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
 
+const scriptPath=process.env.SCRIPTPATH;
 const nsec = process.env.NSEC;
 const npub = process.env.PUBHEX;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
@@ -241,7 +242,7 @@ const subscription = observable.subscribe(async (packet) => {
             // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
             // postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[]);
             //コミットとプッシュ
-            exec('sh gitPush.sh', (err, stdout, stderr) => {
+            exec(`sh ${scriptPath}/gitPush.sh`, (err, stdout, stderr) => {
               if (err) {
                 console.log(`stderr: ${stderr}`)
                 //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
@@ -291,7 +292,7 @@ const subscription = observable.subscribe(async (packet) => {
               await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
 
               //コミットとプッシュ
-              exec('sh gitPush.sh', (err, stdout, stderr) => {
+              exec(`sh ${scriptPath}/gitPush.sh`, (err, stdout, stderr) => {
                 if (err) {
                   console.log(`stderr: ${stderr}`)
                   //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
