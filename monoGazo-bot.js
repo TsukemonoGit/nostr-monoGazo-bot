@@ -1,4 +1,5 @@
 import 'websocket-polyfill'
+import { Octokit } from "@octokit/core";
 import { createRxNostr, createRxForwardReq, verify, uniq, now } from "rx-nostr";
 import { nip19 } from 'nostr-tools';
 import env from "dotenv";
@@ -10,10 +11,10 @@ import { execSync } from 'child_process';
 import { readFile, writeFile } from 'fs/promises'
 
 const urlList = JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
+const octokit = new Octokit({
+  auth: `${process.env.TOKEN}`
+});
 
-const scriptPath = process.env.SCRIPTPATH;
-const gitName = process.env.GITNAME;
-const gitEmail = process.env.GITEMAIL;
 const nsec = process.env.NSEC;
 const npub = process.env.PUBHEX;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
@@ -248,19 +249,16 @@ const subscription = observable.subscribe(async (packet) => {
               //コミットとプッシュ
               // await gitPush();
               // postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
-              //コミットとプッシュ
-              exec('sudo sh gitPush.sh', (err, stdout, stderr) => {
-                if (err) {
-                  console.log(`stderr: ${stderr}`)
-                  //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
-                  postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
-                  return
-                }
-                console.log(`stdout: ${stdout}`)
-                // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
-                postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
 
+              //コミットとプッシュ
+              await octokit.request('POST /repos/TsukemonoGit/nostr-nomoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
+                ref: 'main',
+
+                headers: {
+                  'Accept': 'application/vnd.github.v3+json'
+                }
               })
+
             } catch (error) {
               postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
             }
@@ -306,18 +304,14 @@ const subscription = observable.subscribe(async (packet) => {
                 //   await gitPush();
                 //   postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
                 //コミットとプッシュ
-                exec('sudo sh gitPush.sh', (err, stdout, stderr) => {
-                  if (err) {
-                    console.log(`stderr: ${stderr}`)
-                    //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
-                    postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
-                    return
-                  }
-                  console.log(`stdout: ${stdout}`)
-                  // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
-                  postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
+                await octokit.request('POST /repos/TsukemonoGit/nostr-nomoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
+                  ref: 'main',
 
+                  headers: {
+                    'Accept': 'application/vnd.github.v3+json'
+                  }
                 })
+
               } catch (error) {
                 postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
               }
