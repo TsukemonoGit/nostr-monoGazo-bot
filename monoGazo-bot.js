@@ -56,7 +56,7 @@ const postRepEvent = (event, content, tags) => {//}:EventData){
   if (root) {
     tag.push(root);
   }
-  if(tags.length>0){
+  if (tags.length > 0) {
     tag.push(tags);
   }
   const res = rxNostr.send({
@@ -64,7 +64,7 @@ const postRepEvent = (event, content, tags) => {//}:EventData){
     content: content,
     tags: tag,
     pubkey: npub,
-    created_at: Math.max(event.created_at + 1,now())
+    created_at: Math.max(event.created_at + 1, now())
   }, { seckey: nsec }).subscribe({
     next: ({ from }) => {
       console.log("OK", from);
@@ -122,7 +122,7 @@ const subscription = observable.subscribe(async (packet) => {
             if (numberValue < urlList.length && numberValue >= 0) {
               monoGazo(packet, numberValue, true);
             } else {
-              postRepEvent(packet.event,"そんなのないよ",[])
+              postRepEvent(packet.event, "そんなのないよ", [])
               // const tags = [
               //   ["p", packet.event.pubkey],
               //   ["e", packet.event.id]
@@ -131,7 +131,7 @@ const subscription = observable.subscribe(async (packet) => {
 
             }
           } else {
-            postRepEvent(packet.event,"そんなのないよ",[])
+            postRepEvent(packet.event, "そんなのないよ", [])
             // const tags = [
             //   ["p", packet.event.pubkey],
             //   ["e", packet.event.id]
@@ -144,13 +144,13 @@ const subscription = observable.subscribe(async (packet) => {
 
       case filteredCommands[0] === "再起動":
         if (filteredCommands.length <= 1) {
-          
+
           // const tags = [
           //   ["p", packet.event.pubkey],
           //   ["e", packet.event.id]
           // ];
           // postEvent(packet.event.kind, "relay か もの画像 かどっち", tags);
-          postRepEvent(packet.event,"relay か もの画像 かどっち",[])
+          postRepEvent(packet.event, "relay か もの画像 かどっち", [])
         } else if (filteredCommands[1] === "relay") {
           //relay再起動
           if (owners.includes(packet.event.pubkey)) {
@@ -162,13 +162,13 @@ const subscription = observable.subscribe(async (packet) => {
             exec('sudo supervisorctl restart broadcast-relay', (err, stdout, stderr) => {
               if (err) {
                 console.log(`stderr: ${stderr}`)
-               // postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
-                postRepEvent(packet.event,"₍ xᴗx ₎",[])
+                // postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
+                postRepEvent(packet.event, "₍ xᴗx ₎", [])
                 return
               }
               console.log(`stdout: ${stdout}`)
               //postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
-              postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[])
+              postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
 
             }
             )
@@ -185,13 +185,13 @@ const subscription = observable.subscribe(async (packet) => {
             exec('sudo supervisorctl restart monoGazo', (err, stdout, stderr) => {
               if (err) {
                 console.log(`stderr: ${stderr}`)
-              //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
-                postRepEvent(packet.event,"₍ xᴗx ₎",[])
+                //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
+                postRepEvent(packet.event, "₍ xᴗx ₎", [])
                 return
               }
               console.log(`stdout: ${stdout}`)
-             // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
-              postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[])
+              // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
+              postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
 
             }
             )
@@ -239,18 +239,18 @@ const subscription = observable.subscribe(async (packet) => {
             //   ["e", packet.event.id]
             // ];
             // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
-           // postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[]);
+            // postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[]);
             //コミットとプッシュ
-            exec('gitPush.sh', (err, stdout, stderr) => {
+            exec('sh gitPush.sh', (err, stdout, stderr) => {
               if (err) {
                 console.log(`stderr: ${stderr}`)
-              //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
-                postRepEvent(packet.event,"₍ ･ᴗx ₎",[])
+                //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
+                postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
                 return
               }
               console.log(`stdout: ${stdout}`)
-             // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
-              postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[])
+              // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
+              postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
 
             })
 
@@ -260,7 +260,7 @@ const subscription = observable.subscribe(async (packet) => {
             //   ["e", packet.event.id]
             // ];
             // postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
-            postRepEvent(packet.event,"₍ xᴗx ₎",[])
+            postRepEvent(packet.event, "₍ xᴗx ₎", [])
           }
         } else {
           // const tags = [
@@ -268,7 +268,7 @@ const subscription = observable.subscribe(async (packet) => {
           //   ["e", packet.event.id]
           // ];
           // postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
-          postRepEvent(packet.event,"₍ xᴗx ₎",[])
+          postRepEvent(packet.event, "₍ xᴗx ₎", [])
         }
         break;
       //ものがぞう削除こまんど
@@ -282,33 +282,45 @@ const subscription = observable.subscribe(async (packet) => {
             //削除する要素
             const deleteUrl = urlList[numericValue];
             const message = JSON.stringify(deleteUrl, null, 2) + "\nを削除します";
-           
-            postRepEvent(packet.event,message,[])
-           // postEvent(packet.event.kind, message, tags);
+
+            postRepEvent(packet.event, message, [])
+            // postEvent(packet.event.kind, message, tags);
             //削除して保存
-            urlList.splice(numericValue,1);
+            urlList.splice(numericValue, 1);
             try {
               await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
 
-              postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[])
+              //コミットとプッシュ
+              exec('sh gitPush.sh', (err, stdout, stderr) => {
+                if (err) {
+                  console.log(`stderr: ${stderr}`)
+                  //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
+                  postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
+                  return
+                }
+                console.log(`stdout: ${stdout}`)
+                // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
+                postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
+
+              })
             } catch (error) {
-              postRepEvent(packet.event,"₍ xᴗx ₎",[])
+              postRepEvent(packet.event, "₍ xᴗx ₎", [])
             }
           } else {
-              // 数値に変換できなかった場合の処理
-              postRepEvent(packet.event,"₍ xᴗx ₎",[])
+            // 数値に変換できなかった場合の処理
+            postRepEvent(packet.event, "₍ xᴗx ₎", [])
           }
-          
 
-        
+
+
         } else {
-          postRepEvent(packet.event,"₍ xᴗx ₎",[])
+          postRepEvent(packet.event, "₍ xᴗx ₎", [])
         }
         break;
       default:
         console.log("defaultのとこ");
-        postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[]);
-        
+        postRepEvent(packet.event, "₍ ･ᴗ･ ₎", []);
+
         break;
     }
 
@@ -343,7 +355,7 @@ function monoGazo(packet, urlIndex, syousai) {
   }
   // console.log(packet.event.created_at + 1);
   //const created_at = packet.event.created_at + 1;
-  postEvent(packet.event.kind, `#もの画像\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} (${urlList[urlIndex].date}) ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} ${syousai ? `\n元: nostr:${urlList[urlIndex].note}` : `\n(index:${urlIndex})`}`, tags, Math.max(packet.event.created_at + 1,now()));
+  postEvent(packet.event.kind, `#もの画像\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} (${urlList[urlIndex].date}) ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} ${syousai ? `\n元: nostr:${urlList[urlIndex].note}` : `\n(index:${urlIndex})`}`, tags, Math.max(packet.event.created_at + 1, now()));
 
 
 }
@@ -369,7 +381,7 @@ function profileChange(packet) {
   }
   postEvent(0, JSON.stringify(metadata), []);
 
-  postEvent(1, `あいこんかえた\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} (${urlList[urlIndex].date})\n元: nostr:${urlList[urlIndex].note}`, [["r", urlList[urlIndex].url]], Math.max(packet.event.created_at + 1,now()));
+  postEvent(1, `あいこんかえた\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} (${urlList[urlIndex].date})\n元: nostr:${urlList[urlIndex].note}`, [["r", urlList[urlIndex].url]], Math.max(packet.event.created_at + 1, now()));
 
 }
 
@@ -391,7 +403,7 @@ function naifofo(packet) {
   // console.log(packet.event.created_at + 1);
   //const created_at = packet.event.created_at + 1;
   //元note: note1hd5rumpdyhc6dm5p3q8ryu5l622jcvd90wk6zpc80834s623rexsgv6mdn
-  postEvent(packet.event.kind, `あるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像`, tags,Math.max(packet.event.created_at + 1,now()));
+  postEvent(packet.event.kind, `あるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像`, tags, Math.max(packet.event.created_at + 1, now()));
 
 }
 
@@ -413,7 +425,7 @@ function wareki(packet) {
   const now = new Date();
   const wareki = now.toLocaleString("ja-JP-u-ca-japanese", { dateStyle: "long" });
 
-  postEvent(packet.event.kind, `${wareki} らしい`, tags,Math.max(packet.event.created_at + 1,now()));
+  postEvent(packet.event.kind, `${wareki} らしい`, tags, Math.max(packet.event.created_at + 1, now()));
 
 }
 
@@ -432,7 +444,7 @@ function monoLen(packet) {
   // console.log(packet.event.created_at + 1);
   //const created_at = packet.event.created_at + 1;
 
-  postEvent(packet.event.kind, `もの画像は今全部で${urlList.length}枚あるよ`, tags, Math.max(packet.event.created_at + 1,now()));
+  postEvent(packet.event.kind, `もの画像は今全部で${urlList.length}枚あるよ`, tags, Math.max(packet.event.created_at + 1, now()));
 }
 
 function atirakara(pubkey, packet) {
@@ -458,6 +470,6 @@ function atirakara(pubkey, packet) {
   // console.log(packet.event.created_at + 1);
   //const created_at = packet.event.created_at + 1;
   //元note: note1hd5rumpdyhc6dm5p3q8ryu5l622jcvd90wk6zpc80834s623rexsgv6mdn
-  postEvent(packet.event.kind, `nostr:${nip19.npubEncode(pubkey)} あちらのお客様からです\nあるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像\nnostr:${nip19.noteEncode(packet.event.id)}`, tags, Math.max(packet.event.created_at + 1,now()));
+  postEvent(packet.event.kind, `nostr:${nip19.npubEncode(pubkey)} あちらのお客様からです\nあるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像\nnostr:${nip19.noteEncode(packet.event.id)}`, tags, Math.max(packet.event.created_at + 1, now()));
 
 }
