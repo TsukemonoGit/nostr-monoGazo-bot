@@ -249,7 +249,7 @@ const subscription = observable.subscribe(async (packet) => {
             // postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[]);
             try {
               //コミットとプッシュ
-               await gitPush();
+               await gitPush(packet);
               // postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
 
               //コミットとプッシュgitPush.yml
@@ -312,7 +312,7 @@ const subscription = observable.subscribe(async (packet) => {
 
               try {
                 //   //コミットとプッシュ
-                   await gitPush();
+                   await gitPush(packet);
                 //   postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
                 //コミットとプッシュ
                 //https://docs.github.com/ja/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event
@@ -515,7 +515,7 @@ function atirakara(pubkey, packet) {
 }
 
 
-async function gitPush() {
+async function gitPush(packet) {
   // 指定されたディレクトリに移動
   process.chdir(scriptPath);
   // 日付を取得
