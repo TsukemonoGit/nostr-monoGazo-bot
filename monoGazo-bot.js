@@ -18,6 +18,7 @@ const octokit = new Octokit({
 
 const nsec = process.env.NSEC;
 const npub = process.env.PUBHEX;
+const scriptPath=process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
 const rxNostr = createRxNostr();
 await rxNostr.switchRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://nostr.fediverse.jp"]);
@@ -246,7 +247,7 @@ const subscription = observable.subscribe(async (packet) => {
             // ];
             // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
             // postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[]);
-            //try {
+            try {
               //コミットとプッシュ
                await gitPush();
               // postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
@@ -268,9 +269,10 @@ const subscription = observable.subscribe(async (packet) => {
 
 
 
-            // } catch (error) {
-            //   postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
-            // }
+            } catch (error) {
+              console.log(error);
+              postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
+            }
 
           } catch (error) {
             // const tags = [
@@ -308,7 +310,7 @@ const subscription = observable.subscribe(async (packet) => {
             try {
               await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
 
-             // try {
+              try {
                 //   //コミットとプッシュ
                    await gitPush();
                 //   postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
@@ -337,9 +339,10 @@ const subscription = observable.subscribe(async (packet) => {
                 // })
 
 
-              // } catch (error) {
-              //   postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
-              // }
+              } catch (error) {
+                console.log(error);
+                postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
+              }
             } catch (error) {
               postRepEvent(packet.event, "₍ xᴗx ₎", [])
             }
@@ -519,9 +522,9 @@ async function gitPush() {
   const currentDate = new Date().toISOString().slice(0, 10);
  
     // git コマンドを同期的に実行
-  
+  console.log(`cd ${scriptPath}`);
     
-    exec(`cd ${scriptPath} && git add . && git commit -m "${currentDate}" &&  git push origin main`, (err, stdout, stderr) => {
+    exec(`cd ${scriptPath} &&  git config --local user.name 'TsukemonoGit' && git config --local user.email 'mine43try@outlook.com' && git add . && git commit -m "${currentDate}" &&  git push origin main`, (err, stdout, stderr) => {
       if (err) {
         console.log(`stderr: ${stderr}`)
         //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
