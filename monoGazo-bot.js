@@ -246,25 +246,31 @@ const subscription = observable.subscribe(async (packet) => {
             // ];
             // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
             // postRepEvent(packet.event,"₍ ･ᴗ･ ₎",[]);
-            try {
+            //try {
               //コミットとプッシュ
-              // await gitPush();
+               await gitPush();
               // postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
-           
-              //コミットとプッシュ
-              await octokit.request('POST /repos/TsukemonoGit/nostr-monoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
-                ref: 'main',
-               
-                headers: {
-                  'Accept': 'application/vnd.github.v3+json'
-                      }
-                  })
-              
-            
-              
-            } catch (error) {
-              postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
-            }
+
+              //コミットとプッシュgitPush.yml
+              //https://docs.github.com/ja/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event
+            //   await octokit.request('POST /repos/TsukemonoGit/nostr-monoGazo-bot/actions/workflows/6162725769/dispatches', {
+            //     owner: 'TsukemonoGit',
+            //     repo: 'nostr-monoGazo-bot',
+            //     workflow_id: '6162725769',
+            //     ref: 'main',
+            //     inputs: {
+            //       data: JSON.stringify(newData)
+            //     },
+            //     headers: {
+            //       'X-GitHub-Api-Version': '2022-11-28'
+            //     }
+            //   })
+
+
+
+            // } catch (error) {
+            //   postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
+            // }
 
           } catch (error) {
             // const tags = [
@@ -302,24 +308,38 @@ const subscription = observable.subscribe(async (packet) => {
             try {
               await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
 
-              try {
+             // try {
                 //   //コミットとプッシュ
-                //   await gitPush();
+                   await gitPush();
                 //   postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
-                 //コミットとプッシュ
-                 await octokit.request('POST /repos/TsukemonoGit/nostr-monoGazo-bot/actions/workflows/gitPush.yml/dispatches', {
-                  ref: 'main',
-                 
-                  headers: {
-                    'Accept': 'application/vnd.github.v3+json'
-                        }
-                    })
-                
-            
-              
-              } catch (error) {
-                postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
-              }
+                //コミットとプッシュ
+                //https://docs.github.com/ja/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event
+                //  await octokit.request('POST /repos/TsukemonoGit/nostr-monoGazo-bot/actions/workflows/6162725769/dispatches', {
+                //   ref: 'main',
+
+                //   headers: {
+                //     'Accept': 'application/vnd.github.v3+json'
+                //         }
+                //     })
+
+
+                // await octokit.request('POST /repos/TsukemonoGit/nostr-monoGazo-bot/actions/workflows/6162725769/dispatches', {
+                //   owner: 'TsukemonoGit',
+                //   repo: 'nostr-monoGazo-bot',
+                //   workflow_id: '6162725769',
+                //   ref: 'main',
+                //   inputs: {
+                //     number: numericValue
+                //   },
+                //   headers: {
+                //     'X-GitHub-Api-Version': '2022-11-28'
+                //   }
+                // })
+
+
+              // } catch (error) {
+              //   postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
+              // }
             } catch (error) {
               postRepEvent(packet.event, "₍ xᴗx ₎", [])
             }
@@ -497,17 +517,24 @@ async function gitPush() {
   process.chdir(scriptPath);
   // 日付を取得
   const currentDate = new Date().toISOString().slice(0, 10);
-  try {
+ 
     // git コマンドを同期的に実行
-
-    execSync('sudo git add .');
-    execSync(`sudo git commit -m "${currentDate}"`);
-    execSync('sudo git push origin main');
+  
+    
+    exec(`cd ${scriptPath} && git add . && git commit -m "${currentDate}" &&  git push origin main`, (err, stdout, stderr) => {
+      if (err) {
+        console.log(`stderr: ${stderr}`)
+        //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
+        postRepEvent(packet.event, "₍ ･ᴗx ₎", [])
+        return
+      }
+      console.log(`stdout: ${stdout}`)
+      // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
+      postRepEvent(packet.event, "₍ ･ᴗ･ ₎", [])
+    })
+    
+   
 
     console.log(`Successfully committed and pushed to main branch.`);
-  } catch (error) {
-    throw new Error(error);
-    //console.error(`Error: ${error.message}`);
-    //process.exit(1); // エラーコードでプロセスを終了
-  }
+ 
 }
