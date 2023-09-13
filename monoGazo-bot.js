@@ -18,6 +18,7 @@ const octokit = new Octokit({
 
 const nsec = process.env.NSEC;
 const npub = process.env.PUBHEX;
+const accessToken = process.env.TOKEN;
 const scriptPath=process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
 const rxNostr = createRxNostr();
@@ -524,7 +525,7 @@ async function gitPush(packet) {
     // git コマンドを同期的に実行
   console.log(`cd ${scriptPath}`);
     
-    exec(`cd ${scriptPath}   && git add . && git commit -m "${currentDate}" && sudo git push -u origin main`, (err, stdout, stderr) => {
+    exec(`cd ${scriptPath}   && git remote set-url origin https://${accessToken}@github.com/TsukemonoGit/nostr-monoGazo-bot.git && git add . && git commit -m "${currentDate}" && sudo git push -u origin main`, (err, stdout, stderr) => {
       if (err) {
         console.log(`stderr: ${stderr}`)
         //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
