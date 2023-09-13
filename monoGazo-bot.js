@@ -524,7 +524,7 @@ async function gitPush(packet) {
     // git コマンドを同期的に実行
   console.log(`cd ${scriptPath}`);
     
-    exec(`cd ${scriptPath} &&  git config --local user.name 'TsukemonoGit' && git config --local user.email 'mine43try@outlook.com' && git add . && git commit -m "${currentDate}" &&  git push origin main`, (err, stdout, stderr) => {
+    exec(`cd ${scriptPath}   && git add . && git commit -m "${currentDate}" && sudo git push origin main`, (err, stdout, stderr) => {
       if (err) {
         console.log(`stderr: ${stderr}`)
         //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
