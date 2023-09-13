@@ -517,15 +517,14 @@ function atirakara(pubkey, packet) {
 
 
 async function gitPush(packet) {
-  // 指定されたディレクトリに移動
-  process.chdir(scriptPath);
+ 
   // 日付を取得
-  const currentDate = new Date().toISOString().slice(0, 10);
+ // const currentDate = new Date().toISOString().slice(0, 10);
  
     // git コマンドを同期的に実行
   console.log(`cd ${scriptPath}`);
     
-    exec(`cd ${scriptPath}   && git remote set-url origin https://${accessToken}@github.com/TsukemonoGit/nostr-monoGazo-bot.git && git add . && git commit -m "${currentDate}" && sudo git push -u origin main`, (err, stdout, stderr) => {
+    exec(`cd ${scriptPath}   && git remote set-url origin https://${accessToken}@github.com/TsukemonoGit/nostr-monoGazo-bot.git && git add . && git commit -m "Update imageList.json" && sudo git push -u origin main`, (err, stdout, stderr) => {
       if (err) {
         console.log(`stderr: ${stderr}`)
         //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
