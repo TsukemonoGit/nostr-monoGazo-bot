@@ -11,6 +11,7 @@ import { execSync } from 'child_process';
 import { readFile, writeFile } from 'fs/promises'
 
 const urlList = JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
+//const urlList = JSON.parse(await readFile('./app/src/assets/data/imageList.json'));  //JSONで読み込む方
 
 const octokit = new Octokit({
   auth: `${process.env.TOKEN}`
@@ -242,6 +243,7 @@ const subscription = observable.subscribe(async (packet) => {
 
           try {
             await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
+            await writeFile("./app/src/assets/data/imageList.json", JSON.stringify(urlList, null, 2));
             // const tags = [
             //   ["p", packet.event.pubkey],
             //   ["e", packet.event.id]
@@ -310,7 +312,7 @@ const subscription = observable.subscribe(async (packet) => {
             urlList.splice(numericValue, 1);
             try {
               await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
-
+              await writeFile("./app/src/assets/data/imageList.json", JSON.stringify(urlList, null, 2));
               try {
                 //   //コミットとプッシュ
                    await gitPush(packet);
@@ -538,6 +540,6 @@ async function gitPush(packet) {
     
    
 
-    console.log(`Successfully committed and pushed to main branch.`);
+   // console.log(`Successfully committed and pushed to main branch.`);
  
 }

@@ -10,11 +10,11 @@ inputs:
     default: -1
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/gitPush.yml
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - .github/workflows/gitPush.yml
   workflow_dispatch:
 
 
