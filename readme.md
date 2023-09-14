@@ -22,6 +22,15 @@ github上のapp/src/assets/data/imageList.jsonが更新されてるかと思い�
 
 なんもわからん
 
+あほかも
+
+```
+permissions:
+  contents: write
+```
+にしないとpushできないよ
+
+
 本体起動時に起動
 crontab -e
 @reboot sudo supervisorctl start monoGazo
