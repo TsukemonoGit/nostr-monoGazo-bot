@@ -421,7 +421,7 @@ function profileChange(packet) {
     display_name: "もの画像",
     displayName: "もの画像",
     banner: "",
-    website: "",
+    website: "https://tsukemonogit.github.io/nostr-monoGazo-bot/",
     about: "ものが集めた画像\nmono画像\nあるんふぉふぉ\nこれ入れてとか\n入れないでとかあったら\nどうにかこうにかお伝え下さい",
     nip05: "mono_gazo@tsukemonoGit.github.io",
     lud16: "",
