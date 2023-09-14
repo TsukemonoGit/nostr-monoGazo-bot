@@ -16,7 +16,7 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
-    outDir: '../docs',
+    outDir: './docs',
   },
   base : "/nostr-monoGazo-bot/",
 });
