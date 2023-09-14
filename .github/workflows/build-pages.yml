@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
   pages: write
 
 concurrency:
@@ -45,7 +45,6 @@ jobs:
           set -x
           git add .
           git commit -m 'Update imageList.json' || true # エラーが出ても続行
-          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/TsukemonoGit/nostr-monoGazo-bot.git
           git push || true # エラーが出ても続行
      
     
