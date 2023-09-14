@@ -45,6 +45,8 @@ jobs:
           set -x
           git add .
           git commit -m 'Update imageList.json' || true # エラーが出ても続行
+          git config user.name ${{secrets.USER_NAME}}
+          git config user.email ${{secrets.USER_EMAIL}}
           git remote set-url origin https://${{secrets.USER_NAME}}@github.com/${{secrets.USER_NAME}}/nostr-monoGazo-bot.git
           git push || true # エラーが出ても続行
      
