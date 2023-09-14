@@ -6,5 +6,3 @@
 crontab -e
 @reboot sudo supervisorctl start monoGazo
 
-
-tokenは.envとプッシュ時のコミット用にgithubactionsの環境変数に
