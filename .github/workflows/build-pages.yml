@@ -41,9 +41,10 @@ jobs:
         run: |
           git config user.email "${{ secrets.USER_EMAIL}}"
           git config user.name "${{secrets.USER_NAME}}"
+         
           git add ./app/src/assets/data/imageList.json
           git commit -m "Update imageList.json"
-          git push https://${{secrets.USER_NAME}}:${{secrets.TOKEN}}@github.com/TsukemonoGit/nostr-monoGazo-bot.git
+          git push https://${{secrets.TOKEN}}@github.com/TsukemonoGit/nostr-monoGazo-bot.git
 
       - name: Build
         run: npm run build
