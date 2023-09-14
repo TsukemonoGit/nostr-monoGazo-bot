@@ -37,12 +37,16 @@ jobs:
     
      # コミットするステップを追加
       - name: Commit changes
+        env:
+          NAME:  ${{ secrets.USER_NAME}}
+          EMAIL: ${{ secrets.USER_EMAIL}}
+          TOKEN: ${{ secrets.TOKEN }}
         run: |
-          git config user.email "mine43try@outlook.com"
-          git config user.name "TsukemonoGit"
+          git config user.email "$EMAIL"
+          git config user.name "$NAME"
           git add ./app/src/assets/data/imageList.json
           git commit -m "Update imageList.json"
-          git push
+          git push https://$NAME:$TOKEN@github.com/TsukemonoGit/nostr-monoGazo-bot.git
 
       - name: Build
         run: npm run build
