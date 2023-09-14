@@ -30,6 +30,16 @@ permissions:
 ```
 にしないとpushできないよ
 
+ということでちゃんとgithub上のapp/src/assets/data/imageList.jsonが更新されました
+
+jekyllは無限に
+```
+ Conversion error: Jekyll::Converters::Scss encountered an error while converting 'assets/css/style.scss':
+                    No such file or directory @ dir_chdir - /github/workspace/docs
+```
+ってなってる
+
+なんももわからん
 
 本体起動時に起動
 crontab -e
