@@ -30,8 +30,12 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm install
+        with:
+          path: './app'
       - name: Build
         run: npm run build
+        with:
+          path: './app'
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
