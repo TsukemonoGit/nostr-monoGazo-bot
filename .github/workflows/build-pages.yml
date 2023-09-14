@@ -40,23 +40,19 @@ jobs:
           name:  ${{secrets.USER_NAME}}
           email: ${{secrets.USER_EMAIL}}
     
-      - name: add 
-        run: |
-          set -x       
-          git add .
-
-      - name: Check for changes
-        id: check_changes
-        run: |
-          git diff --exit-code || echo "::set-output name=changed::true"
-          echo "::set-output name=changed::false"
-        continue-on-error: true
+      # - name: Check for changes
+      #   id: check_changes
+      #   run: |
+      #     git diff --exit-code || echo "::set-output name=changed::true"
+      #     echo "::set-output name=changed::false"
+      #   continue-on-error: true
 
       - name: Commit and Push if changed
-        if: steps.check_changes.outputs.changed == 'true'
         run: |
-          git commit -m 'Update imageList.json'
-          git push
+          set -x
+          git add .
+          git commit -m 'Update imageList.json' || true # エラーが出ても続行
+          git push || true # エラーが出ても続行
      
     
 
