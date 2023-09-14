@@ -34,17 +34,19 @@ jobs:
         working-directory: ./app
       - name: Copy imageList.json
         run: cp imageList.json ./app/src/assets/data/imageList.json
-    
-     # コミットするステップを追加
-      - name: Commit changes
       
-        run: |
-          git config user.email "${{ secrets.USER_EMAIL}}"
-          git config user.name "${{secrets.USER_NAME}}"
-          git remote set-url origin https://${{secrets.TOKEN}}@github.com/TsukemonoGit/nostr-monoGazo-bot.git
-          git add ./app/src/assets/data/imageList.json
-          git commit -m "Update imageList.json"
-          git push 
+        - uses: snow-actions/git-config-user@v1.0.0
+        with:
+          name:  ${{secrets.USER_NAME}}
+          email: ${{secrets.USER_EMAIL}}
+    
+      - run: |
+          set -x       
+          git add .
+          git commit -m 'Update imageList.json'
+          git push
+     # コミットするステップを追加
+    
 
       - name: Build
         run: npm run build
