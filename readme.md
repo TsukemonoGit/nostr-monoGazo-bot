@@ -22,7 +22,7 @@ github上のapp/src/assets/data/imageList.jsonが更新されてるかと思い�
 
 なんもわからん
 
-あほかも
+pushできるようになりました
 
 ```
 permissions:
