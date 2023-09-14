@@ -13,6 +13,14 @@ push したときにGithub上でjsonを更新してからgithub pagesをデプ�
 
 その関係でボットはコミットプッシュする前にぷるする
 
+と思いきや（？）
+
+github上のapp/src/assets/data/imageList.jsonが更新されてるかと思いきや
+更新されてない。pagesの方はデータ更新されてるのに
+
+とりあえずおもてのimageList.jsonは更新されるしpagesも更新されるからとりあえず良しとする？
+
+なんもわからん
 
 本体起動時に起動
 crontab -e
