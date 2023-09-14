@@ -5,7 +5,8 @@
   "main": "monoGazo-bot.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "panda codegen"
   },
   "author": "",
   "license": "ISC",
