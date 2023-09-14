@@ -41,10 +41,10 @@ jobs:
         run: |
           git config user.email "${{ secrets.USER_EMAIL}}"
           git config user.name "${{secrets.USER_NAME}}"
-         
+          git remote set-url origin https://${{secrets.TOKEN}}@github.com/TsukemonoGit/nostr-monoGazo-bot.git
           git add ./app/src/assets/data/imageList.json
           git commit -m "Update imageList.json"
-          git push https://${{secrets.TOKEN}}@github.com/TsukemonoGit/nostr-monoGazo-bot.git
+          git push 
 
       - name: Build
         run: npm run build
