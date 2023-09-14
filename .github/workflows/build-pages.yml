@@ -39,14 +39,6 @@ jobs:
         with:
           name:  ${{secrets.USER_NAME}}
           email: ${{secrets.USER_EMAIL}}
-    
-      # - name: Check for changes
-      #   id: check_changes
-      #   run: |
-      #     git diff --exit-code || echo "::set-output name=changed::true"
-      #     echo "::set-output name=changed::false"
-      #   continue-on-error: true
-
       - name: Commit and Push if changed
         run: |
           set -x
