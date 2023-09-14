@@ -38,12 +38,21 @@ jobs:
           name:  ${{secrets.USER_NAME}}
           email: ${{secrets.USER_EMAIL}}
     
-      - run: |
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --exit-code || echo "::set-output name=changed::true"
+          echo "::set-output name=changed::false"
+        continue-on-error: true
+
+      - name: Commit and Push if changed
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
           set -x       
           git add .
           git commit -m 'Update imageList.json'
           git push
-     # コミットするステップを追加
+     
     
 
       - name: Build
