@@ -35,6 +35,15 @@ jobs:
       - name: Copy imageList.json
         run: cp imageList.json ./app/src/assets/data/imageList.json
     
+     # コミットするステップを追加
+      - name: Commit changes
+        run: |
+          git config user.email "mine43try@outlook.com"
+          git config user.name "TsukemonoGit"
+          git add ./app/src/assets/data/imageList.json
+          git commit -m "Update imageList.json"
+          git push
+
       - name: Build
         run: npm run build
         working-directory: ./app
