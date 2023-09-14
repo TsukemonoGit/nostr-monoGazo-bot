@@ -40,6 +40,11 @@ jobs:
           name:  ${{secrets.USER_NAME}}
           email: ${{secrets.USER_EMAIL}}
     
+      - name: add 
+        run: |
+          set -x       
+          git add .
+
       - name: Check for changes
         id: check_changes
         run: |
@@ -50,8 +55,6 @@ jobs:
       - name: Commit and Push if changed
         if: steps.check_changes.outputs.changed == 'true'
         run: |
-          set -x       
-          git add .
           git commit -m 'Update imageList.json'
           git push
      
