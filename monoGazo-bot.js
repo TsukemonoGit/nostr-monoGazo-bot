@@ -242,6 +242,8 @@ const subscription = observable.subscribe(async (packet) => {
           urlList.push(newData);
 
           try {
+            // 配列を日付でソート
+            urlList.sort((a, b) => new Date(a.date) - new Date(b.date));
             await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
             //await writeFile("./app/src/assets/data/imageList.json", JSON.stringify(urlList, null, 2));
             // const tags = [
@@ -311,6 +313,9 @@ const subscription = observable.subscribe(async (packet) => {
             //削除して保存
             urlList.splice(numericValue, 1);
             try {
+              // 配列を日付でソート
+              urlList.sort((a, b) => new Date(a.date) - new Date(b.date));
+
               await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
               //await writeFile("./app/src/assets/data/imageList.json", JSON.stringify(urlList, null, 2));
               try {
