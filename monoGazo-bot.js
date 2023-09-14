@@ -243,7 +243,7 @@ const subscription = observable.subscribe(async (packet) => {
 
           try {
             await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
-            await writeFile("./app/src/assets/data/imageList.json", JSON.stringify(urlList, null, 2));
+            //await writeFile("./app/src/assets/data/imageList.json", JSON.stringify(urlList, null, 2));
             // const tags = [
             //   ["p", packet.event.pubkey],
             //   ["e", packet.event.id]
@@ -312,7 +312,7 @@ const subscription = observable.subscribe(async (packet) => {
             urlList.splice(numericValue, 1);
             try {
               await writeFile("./imageList.json", JSON.stringify(urlList, null, 2));
-              await writeFile("./app/src/assets/data/imageList.json", JSON.stringify(urlList, null, 2));
+              //await writeFile("./app/src/assets/data/imageList.json", JSON.stringify(urlList, null, 2));
               try {
                 //   //コミットとプッシュ
                    await gitPush(packet);
