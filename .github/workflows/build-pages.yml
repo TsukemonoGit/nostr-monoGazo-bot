@@ -37,14 +37,12 @@ jobs:
       
 
       
-      # - uses: snow-actions/git-config-user@v1.0.0
-      #   with:
-      #     name:  ${{secrets.USER_NAME}}
-      #     email: ${{secrets.USER_EMAIL}}
+      - uses: snow-actions/git-config-user@v1.0.0
+        with:
+          name:  ${{secrets.USER_NAME}}
+          email: ${{secrets.USER_EMAIL}}
       - run: |
           set -x
-          git config user.name ${{secrets.USER_NAME}}
-          git config user.email ${{secrets.USER_EMAIL}}
           git add .
           git commit -m 'Update imageList.json' || true # エラーが出ても続行
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/TsukemonoGit/nostr-monoGazo-bot.git
