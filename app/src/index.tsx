@@ -3,10 +3,9 @@ import { render } from 'solid-js/web';
 
 import './index.css';
 import App from './App';
-import About from './About'
-import Contact from './Contact';
-import { Router, Route, Routes } from "@solidjs/router";
-import styles from "./App.module.css";
+
+import { Router} from "@solidjs/router";
+
 const root = document.getElementById('root');
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
