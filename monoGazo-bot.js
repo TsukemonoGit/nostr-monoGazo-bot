@@ -510,9 +510,10 @@ function atirakara(pubkey, packet) {
     ["t", "もの画像"]];
 
   const root = packet.event.tags.find((item) => item[item.length - 1] === "root");
-
+console.log(root);
   // rootが見つかった場合、tagsにrootを追加
-  if (root && packet.event.kind === "42") {
+  if (root ) {
+    console.log(root);
     tags.push(root);
   }
   // console.log(packet.event.created_at + 1);
