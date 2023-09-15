@@ -5,7 +5,7 @@ import jsonData from "./assets/data/imageList.json";
 
 const App: Component = () => {
     return (
-     <div class={styles.container}>
+     <>
     <h1 class={styles.title}>
         <img class={css({ height: "1.5em",width:'auto', display: 'flex' ,marginRight:'2'})} src='/nostr-monoGazo-bot/images/2.png' alt='₍ ･ᴗ･ ₎'/> monoGazo List
         
@@ -36,7 +36,7 @@ const App: Component = () => {
         <p class={styles.noData}>No data available.</p>
       )
       }
-    </div >
+    </ >
     )
 }
 
@@ -54,12 +54,6 @@ const styles = {
         display: 'inline-block',
         marginRight: '4px', // アイコンとテキストの間隔を調整
         verticalAlign: 'top', // アイコンをテキストと中央揃え
-      }),
-      container: css({
-        fontFamily: 'Arial, sans-serif',
-        padding: '20px',
-        maxWidth: '800px',
-        margin: '0 auto',
       }),
       title: css({
         fontSize: '2rem',

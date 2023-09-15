@@ -26,14 +26,25 @@ const App: Component = () => {
         <A href="/nostr-monoGazo-bot/about" class={css({width:'full',textAlign:'center'})} onClick={scrollToTop}>About</A> {/* 👈 Add a link to the about page */}
         <A href="/nostr-monoGazo-bot/contact" class={css({width:'full',textAlign:'center'})} onClick={scrollToTop}>Contact</A> {/* 👈 Add a link to the contact page */}
       </header>
+      <div class={styles.container}>
       <Routes>
         <Route path="/nostr-monoGazo-bot/" component={Home} />
         <Route path="/nostr-monoGazo-bot/about" component={About} />
         <Route path="/nostr-monoGazo-bot/contact" component={Contact} />
       </Routes>
+      </div>
     </>
   );
 };
 
 
 export default App;
+
+const styles = {
+container: css({
+        fontFamily: 'Arial, sans-serif',
+        padding: '20px',
+        maxWidth: '800px',
+        margin: '0 auto',
+      }),
+    };

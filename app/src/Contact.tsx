@@ -4,7 +4,8 @@ import styles from './Contact.module.css';
 
 const App: Component = () => {
     return (<>
-    <div class={styles.main}>なんもない</div>
+    <h1 class={styles.title}>Contact</h1>
+    <div>なんもない</div>
     </>
     )
 }
