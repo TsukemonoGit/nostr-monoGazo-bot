@@ -15,10 +15,10 @@ const App: Component = () => {
     <>
       <header class={style.header}>
 
-        <A href="/nostr-monoGazo-bot/">Home</A> {/* 👈 Add a link to the about page */}
+        <A href="/nostr-monoGazo-bot/" class={css({width:'full',textAlign:'center'})}>Home</A> {/* 👈 Add a link to the about page */}
 
-        <A href="/nostr-monoGazo-bot/about">About</A> {/* 👈 Add a link to the about page */}
-        <A href="/nostr-monoGazo-bot/contact">Contact</A> {/* 👈 Add a link to the contact page */}
+        <A href="/nostr-monoGazo-bot/about" class={css({width:'full',textAlign:'center'})}>About</A> {/* 👈 Add a link to the about page */}
+        <A href="/nostr-monoGazo-bot/contact" class={css({width:'full',textAlign:'center'})}>Contact</A> {/* 👈 Add a link to the contact page */}
       </header>
       <Routes>
         <Route path="/nostr-monoGazo-bot/" component={Home} />
