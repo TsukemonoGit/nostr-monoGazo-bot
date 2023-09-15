@@ -3,7 +3,10 @@ import { render } from 'solid-js/web';
 
 import './index.css';
 import App from './App';
-
+import About from './About'
+import Contact from './Contact';
+import { Router, Route, Routes } from "@solidjs/router";
+import styles from "./App.module.css";
 const root = document.getElementById('root');
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
@@ -12,4 +15,11 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(() => <App />, root!);
+render(
+  () => (
+    <Router>
+      <App />
+    </Router>
+  ),
+  root!
+);
