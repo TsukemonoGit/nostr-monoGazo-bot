@@ -11,14 +11,20 @@ import style from "./App.module.css"; // import文を変更
 
 
 const App: Component = () => {
+
+
+  const scrollToTop = () => {
+    window.scrollTo(0, 0); // ページのトップにスクロール
+  };
+  
   return (
     <>
       <header class={style.header}>
 
-        <A href="/nostr-monoGazo-bot/" class={css({width:'full',textAlign:'center'})}>Home</A> {/* 👈 Add a link to the about page */}
+        <A href="/nostr-monoGazo-bot/" class={css({width:'full',textAlign:'center'})}  onClick={scrollToTop}>Home</A> {/* 👈 Add a link to the about page */}
 
-        <A href="/nostr-monoGazo-bot/about" class={css({width:'full',textAlign:'center'})}>About</A> {/* 👈 Add a link to the about page */}
-        <A href="/nostr-monoGazo-bot/contact" class={css({width:'full',textAlign:'center'})}>Contact</A> {/* 👈 Add a link to the contact page */}
+        <A href="/nostr-monoGazo-bot/about" class={css({width:'full',textAlign:'center'})} onClick={scrollToTop}>About</A> {/* 👈 Add a link to the about page */}
+        <A href="/nostr-monoGazo-bot/contact" class={css({width:'full',textAlign:'center'})} onClick={scrollToTop}>Contact</A> {/* 👈 Add a link to the contact page */}
       </header>
       <Routes>
         <Route path="/nostr-monoGazo-bot/" component={Home} />
