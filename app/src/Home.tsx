@@ -7,7 +7,7 @@ const App: Component = () => {
     return (
      <div class={styles.container}>
     <h1 class={styles.title}>
-        <img class={css({ width: "fit-content", display: 'flex' ,marginRight:'2'})} src='/nostr-monoGazo-bot/images/1.png' alt='₍ ･ᴗ･ ₎'/> monoGazo List
+        <img class={css({ height: "1.5em",width:'auto', display: 'flex' ,marginRight:'2'})} src='/nostr-monoGazo-bot/images/2.png' alt='₍ ･ᴗ･ ₎'/> monoGazo List
         
       </h1>
       <p class={css({ paddingBottom: 2 })}>nostrの もの画像BOT<a target="_blank"
