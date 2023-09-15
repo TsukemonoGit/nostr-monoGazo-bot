@@ -73,7 +73,7 @@ const postRepEvent = (event, content, tags) => {//}:EventData){
     content: content,
     tags: tag,
     pubkey: npub,
-    created_at: Math.max(event.created_at + 1, now())
+    created_at: Math.max(event.created_at + 1, Math.floor(Date.now()/1000))
   }, { seckey: nsec }).subscribe({
     next: ({ from }) => {
       console.log("OK", from);
@@ -403,7 +403,7 @@ function monoGazo(packet, urlIndex, syousai) {
   }
   // console.log(packet.event.created_at + 1);
   //const created_at = packet.event.created_at + 1;
-  postEvent(packet.event.kind, `#もの画像\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} (${urlList[urlIndex].date}) ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} ${syousai ? `\n元: nostr:${urlList[urlIndex].note}` : `\n(index:${urlIndex})`}`, tags, Math.max(packet.event.created_at + 1, now()));
+  postEvent(packet.event.kind, `#もの画像\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} (${urlList[urlIndex].date}) ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} ${syousai ? `\n元: nostr:${urlList[urlIndex].note}` : `\n(index:${urlIndex})`}`, tags, Math.max(packet.event.created_at + 1, Math.floor(Date.now()/1000)));
 
 
 }
@@ -429,7 +429,7 @@ function profileChange(packet) {
   }
   postEvent(0, JSON.stringify(metadata), []);
 
-  postEvent(1, `あいこんかえた\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} (${urlList[urlIndex].date})\n元: nostr:${urlList[urlIndex].note}`, [["r", urlList[urlIndex].url]], Math.max(packet.event.created_at + 1, now()));
+  postEvent(1, `あいこんかえた\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} (${urlList[urlIndex].date})\n元: nostr:${urlList[urlIndex].note}`, [["r", urlList[urlIndex].url]], Math.max(packet.event.created_at + 1, Math.floor(Date.now()/1000)));
 
 }
 
@@ -451,7 +451,7 @@ function naifofo(packet) {
   // console.log(packet.event.created_at + 1);
   //const created_at = packet.event.created_at + 1;
   //元note: note1hd5rumpdyhc6dm5p3q8ryu5l622jcvd90wk6zpc80834s623rexsgv6mdn
-  postEvent(packet.event.kind, `あるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像`, tags, Math.max(packet.event.created_at + 1, now()));
+  postEvent(packet.event.kind, `あるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像`, tags, Math.max(packet.event.created_at + 1, Math.floor(Date.now()/1000)));
 
 }
 
@@ -473,7 +473,7 @@ function wareki(packet) {
   const now = new Date();
   const wareki = now.toLocaleString("ja-JP-u-ca-japanese", { dateStyle: "long" });
 
-  postEvent(packet.event.kind, `${wareki} らしい`, tags, Math.max(packet.event.created_at + 1, now()));
+  postEvent(packet.event.kind, `${wareki} らしい`, tags, Math.max(packet.event.created_at + 1, Math.floor(Date.now()/1000)));
 
 }
 
@@ -492,7 +492,7 @@ function monoLen(packet) {
   // console.log(packet.event.created_at + 1);
   //const created_at = packet.event.created_at + 1;
 
-  postEvent(packet.event.kind, `もの画像は今全部で${urlList.length}枚あるよ`, tags, Math.max(packet.event.created_at + 1, now()));
+  postEvent(packet.event.kind, `もの画像は今全部で${urlList.length}枚あるよ`, tags, Math.max(packet.event.created_at + 1, Math.floor(Date.now()/1000)));
 }
 
 function atirakara(pubkey, packet) {
@@ -518,7 +518,7 @@ function atirakara(pubkey, packet) {
   // console.log(packet.event.created_at + 1);
   //const created_at = packet.event.created_at + 1;
   //元note: note1hd5rumpdyhc6dm5p3q8ryu5l622jcvd90wk6zpc80834s623rexsgv6mdn
-  postEvent(packet.event.kind, `nostr:${nip19.npubEncode(pubkey)} あちらのお客様からです\nあるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像\nnostr:${nip19.noteEncode(packet.event.id)}`, tags, Math.max(packet.event.created_at + 1, now()));
+  postEvent(packet.event.kind, `nostr:${nip19.npubEncode(pubkey)} あちらのお客様からです\nあるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像\nnostr:${nip19.noteEncode(packet.event.id)}`, tags, Math.max(packet.event.created_at + 1, Math.floor(Date.now()/1000)));
 
 }
 
