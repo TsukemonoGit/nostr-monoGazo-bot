@@ -27,7 +27,7 @@
 .grid {
     margin-top: 10px;
     display: grid;
-    grid-template-columns: auto auto 1fr;
+    grid-template-columns: fit-content(35%) fit-content(25%) 1fr;
 
     border: solid;
     border-color: rgb(73, 73, 73);
