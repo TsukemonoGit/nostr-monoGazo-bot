@@ -91,7 +91,7 @@ postEvent(1, "₍ ･ᴗ･ ₎", []);
 const subscription = observable.subscribe(async (packet) => {
   // Your minimal application!
   if (packet.event.pubkey === "f987fb90696fcb09358629aeebf5156ea05a405101c4f2d9020bf02f47ea4a49") { return; }
-  console.log(packet);
+ // console.log(packet);
   const content = packet.event.content.trim();
 
   if (content === "もの画像" || content === "mono画像") {
@@ -425,7 +425,6 @@ function profileChange(packet) {
     about: "ものが集めた画像\nmono画像\nあるんふぉふぉ\nこれ入れてとか\n入れないでとかあったら\nどうにかこうにかお伝え下さい",
     nip05: "mono_gazo@tsukemonoGit.github.io",
     lud16: "",
-    lud06: ""
   }
   postEvent(0, JSON.stringify(metadata), []);
 

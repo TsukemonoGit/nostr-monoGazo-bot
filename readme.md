@@ -41,7 +41,8 @@ jekyllは無限に
 
 なんももわからん
 
-本体起動時に起動
+本体起動時に起動, 一日一回再起動
 crontab -e
 @reboot sudo supervisorctl start monoGazo
+0 0 * * * sudo supervisorctl restart monoGazo
 
