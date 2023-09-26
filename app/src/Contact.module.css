@@ -17,19 +17,21 @@
   padding: 8px 16px; /* パディングを設定 */
   background-color: #d0dee7; /* 背景色を設定 */
   border-radius: 4px; /* 角丸を設定 */
-  transition: background-color 0.3s ease; /* ホバー時のトランジションを設定 */
  
 }
 
 
-.link:visited {
-  background-color: #d0dee7; /* ホバー時の背景色を変更 */
-  color: #007bff; /* ホバー時のテキストカラーを白に変更 */
-}
 .link:hover {
   background-color: #0056b3; /* ホバー時の背景色を変更 */
   color: #fff; /* ホバー時のテキストカラーを白に変更 */
 }
+@media only screen and (max-width: 768px) {
+  .link:hover {
+    background-color: #d0dee7; /* ホバー時の背景色を変更 */
+    color: #007bff; /* ホバー時のテキストカラーを白に変更 */
+  }
+  
+ }
 .h3{
   font-size: x-large;
   margin: 3rem 0rem 0.5rem 0;
