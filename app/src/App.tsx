@@ -24,7 +24,7 @@ const App: Component = () => {
         <A href="/" class={css({ width: 'full', textAlign: 'center' })} onClick={scrollToTop}>Home</A> {/* 👈 Add a link to the about page */}
 
         <A href="/about" class={css({ width: 'full', textAlign: 'center' })} onClick={scrollToTop}>About</A> {/* 👈 Add a link to the about page */}
-        <A href="/contact" class={css({ width: 'full', textAlign: 'center' })} onClick={scrollToTop}>Contact</A> {/* 👈 Add a link to the contact page */}
+        <A href="/contact" class={css({ width: 'full', textAlign: 'center' })} onClick={scrollToTop}>ほか</A> {/* 👈 Add a link to the contact page */}
       </header>
       <div class={styles.container}>
         <Routes>

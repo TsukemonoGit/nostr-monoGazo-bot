@@ -6,3 +6,26 @@
     margin-top:20px;
   }
 
+/* 例: Pandacssのクラスを使用して<a>タグにスタイルを適用する */
+.link {
+  margin: 4px;
+  /* ここにスタイルを追加してください */
+  color: #007bff; /* テキストカラーを青に設定 */
+  text-decoration: none; /* リンクの下線を削除 */
+  font-weight: bold; /* フォントの太さを変更 */
+  padding: 8px 16px; /* パディングを設定 */
+  background-color: #d0dee7; /* 背景色を設定 */
+  border-radius: 4px; /* 角丸を設定 */
+  transition: background-color 0.3s ease; /* ホバー時のトランジションを設定 */
+}
+
+.link:hover {
+  background-color: #0056b3; /* ホバー時の背景色を変更 */
+  color: #fff; /* ホバー時のテキストカラーを白に変更 */
+}
+
+.h3{
+  font-size: x-large;
+  margin: 2rem 0rem 0.5rem 0;
+
+}
