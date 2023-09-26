@@ -27,19 +27,54 @@ input {
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
   }
   
-  /* ボタン要素のスタイル（例） */
-  button {
+  .btn1{
     background-color: #007bff;
     color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin:10px 0;
   }
+  .btn2{
+    background-color: #ffbb00;
+    color: #fff;
+  }
+/* ボタン要素のスタイル */
+button {
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 10px 5px;
+  position: relative; /* 相対位置を設定 */
+}
   
   /* ボタンのホバースタイル（例） */
-  button:hover {
+  /* button:hover {
     background-color: #0056b3;
   }
+  button:active {
+    background-color: #003975;
+  } */
+  /* ボタンのホバースタイル */
+button:hover::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.3); /* オーバーレイ色（透明度あり） */
+ 
+}
+
+/* ボタンのアクティブスタイル */
+button:active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(138, 138, 138, 0.3); /* オーバーレイ色（透明度あり） */
+ 
+}
+
+

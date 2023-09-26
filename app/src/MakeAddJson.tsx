@@ -35,7 +35,17 @@ const App: Component = () => {
             toast.error("failed to copy")
         }
     }
+    const onClickReset = (): void => {
 
+
+        url.value = "";
+        author.value = "";
+        date.value = "";
+        note.value = "";
+        memo.value = "";
+
+
+    }
     return (<>
         <div class={css({ wordBreak: 'break-all', whiteSpace: 'pre-wrap' })}>
             <ul>
@@ -51,7 +61,8 @@ const App: Component = () => {
                 <li>
                     memo: <input type="text" class={styles.input} ref={memo} /> </li>
             </ul>
-            <button type="button" class={styles.button} onClick={onClickCopy}>Copy</button>
+            <button type="button" class={`${styles.button} ${styles.btn1}`} onClick={onClickCopy}>Copy</button>
+            <button type="button" class={`${styles.button} ${styles.btn2}`} onClick={onClickReset}>Reset</button>
         </div>
 
         <Toaster />

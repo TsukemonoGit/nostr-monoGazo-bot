@@ -8,6 +8,7 @@
 
 /* 例: Pandacssのクラスを使用して<a>タグにスタイルを適用する */
 .link {
+  
   margin: 4px;
   /* ここにスタイルを追加してください */
   color: #007bff; /* テキストカラーを青に設定 */
@@ -26,6 +27,6 @@
 
 .h3{
   font-size: x-large;
-  margin: 2rem 0rem 0.5rem 0;
+  margin: 3rem 0rem 0.5rem 0;
 
 }
