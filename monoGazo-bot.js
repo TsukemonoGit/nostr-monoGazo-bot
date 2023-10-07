@@ -335,9 +335,9 @@ function atirakara(pubkey, packet) {
   console.log(root);
   // rootが見つかった場合、tagsにrootを追加
   if (root) {
-    console.log(root);
+   
     tags.push(root);
-  }
+  } console.log(tags);
   // console.log(packet.event.created_at + 1);
   //const created_at = packet.event.created_at + 1;
   //元note: note1hd5rumpdyhc6dm5p3q8ryu5l622jcvd90wk6zpc80834s623rexsgv6mdn
