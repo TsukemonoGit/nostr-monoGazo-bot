@@ -90,7 +90,7 @@ const postRepEvent = (event, content, tags) => {//}:EventData){
   });
 }
 
-//postEvent(1, "₍ ･ᴗ･ ₎", []);
+postEvent(1, "₍ ･ᴗ･ ₎", []);
 
 
 // Start subscription
