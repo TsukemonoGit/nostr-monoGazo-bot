@@ -39,7 +39,8 @@ const observable = rxNostr.use(rxReq)
   );
 
 
-const postEvent = (kind, content, tags, created_at) => {//}:EventData){
+const postEvent = async (kind, content, tags, created_at) => {//}:EventData){
+  await rxNostr.switchRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp", "wss://relay-jp.nostr.moctane.com"]);
   const res = rxNostr.send({
     kind: kind,
     content: content,
@@ -59,7 +60,8 @@ const postEvent = (kind, content, tags, created_at) => {//}:EventData){
   });
 }
 
-const postRepEvent = (event, content, tags) => {//}:EventData){
+const postRepEvent = async (event, content, tags) => {//}:EventData){
+  await rxNostr.switchRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://nostr.fediverse.jp"]);
   const tag = [
     ["p", event.pubkey],
     ["e", event.id]];
@@ -263,6 +265,13 @@ const subscription = observable.subscribe(async (packet) => {
   } else if (content.includes("あるんふぉふぉ") || content.includes("あるふぉふぉ")) {
     console.log("あるんふぉふぉ");
     profileChange(packet);
+  } else if (/(もの画像|mono画像)どこ[?？]?/.test(content)) {
+    postRepEvent(packet.event, `₍ ･ᴗ･ ₎ﾖﾝﾀﾞ?`, []);
+
+  } else if (/(もの|mono)(画像)?サイトどこ[?？]?/.test(content)) {
+    const tags = [
+      ["r", "https://tsukemonogit.github.io/nostr-monoGazo-bot/"],];
+    postRepEvent(packet.event, `₍ ･ᴗ･ ₎っ https://tsukemonogit.github.io/nostr-monoGazo-bot/`, tags);
   }
 });
 
@@ -335,7 +344,7 @@ function atirakara(pubkey, packet) {
   console.log(root);
   // rootが見つかった場合、tagsにrootを追加
   if (root) {
-   
+
     tags.push(root);
   } console.log(tags);
   // console.log(packet.event.created_at + 1);
