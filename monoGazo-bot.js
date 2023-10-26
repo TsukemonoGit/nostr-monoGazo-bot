@@ -1,6 +1,7 @@
 import 'websocket-polyfill'
 import { Octokit } from "@octokit/core";
 import { createRxNostr, createRxForwardReq, verify, uniq, now, completeOnTimeout } from "rx-nostr";
+import { delay, filter } from "rxjs";
 import { nip19 } from 'nostr-tools';
 import env from "dotenv";
 env.config();
@@ -23,7 +24,7 @@ const accessToken = process.env.TOKEN;
 const scriptPath = process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
 const rxNostr = createRxNostr();
-await rxNostr.switchRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://nostr.fediverse.jp"]);
+await rxNostr.switchRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp", "wss://relay-jp.nostr.moctane.com"]);
 
 const rxReq = createRxForwardReq();
 
@@ -38,9 +39,15 @@ const observable = rxNostr.use(rxReq)
 
   );
 
+//リレーの接続監視、エラーだったら1分待って再接続する
+rxNostr.createConnectionStateObservable().pipe(
+  //when an error pachet is received
+  filter((packet) => packet.state === "error"),
+  //wait one minute
+  delay(60 * 1000)
+).subscribe((packet) => { rxNostr.reconnect(packet.from) });
 
 const postEvent = async (kind, content, tags, created_at) => {//}:EventData){
-  await rxNostr.switchRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp", "wss://relay-jp.nostr.moctane.com"]);
   const res = rxNostr.send({
     kind: kind,
     content: content,
@@ -61,7 +68,7 @@ const postEvent = async (kind, content, tags, created_at) => {//}:EventData){
 }
 
 const postRepEvent = async (event, content, tags) => {//}:EventData){
-  await rxNostr.switchRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://nostr.fediverse.jp"]);
+
   const tag = [
     ["p", event.pubkey],
     ["e", event.id]];
