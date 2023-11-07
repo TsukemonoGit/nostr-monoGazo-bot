@@ -150,7 +150,7 @@ const subscription = observable.subscribe(async (packet) => {
                 ["r", urlList[numberValue].url],
                 ["t", "もの画像"]
               ];
-              postRepEvent(packet.event, `#もの画像\n${urlList[numberValue].url}\n作: nostr:${urlList[numberValue].author} (${urlList[numberValue].date}) ${urlList[numberValue].memo ? " (" + urlList[numberValue].memo + ")" : ""} \n元: nostr:${urlList[numberValue].note}`, tags);
+              postRepEvent(packet.event, `#もの画像\n${urlList[numberValue].url}\n作: nostr:${urlList[numberValue].author} (${urlList[numberValue].date}) ${urlList[numberValue].memo ? " (" + urlList[numberValue].memo + ")" : ""} `, tags);
             } else {
               postRepEvent(packet.event, "そんなのないよ", []);
             }
@@ -328,7 +328,7 @@ function profileChange(packet) {
   }
   postEvent(0, JSON.stringify(metadata), []);
 
-  postEvent(1, `あいこんかえた\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} (${urlList[urlIndex].date})\n元: nostr:${urlList[urlIndex].note}`, [["r", urlList[urlIndex].url]], Math.max(packet.event.created_at + 1, Math.floor(Date.now() / 1000)));
+  postEvent(1, `あいこんかえた\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} (${urlList[urlIndex].date})`, [["r", urlList[urlIndex].url]], Math.max(packet.event.created_at + 1, Math.floor(Date.now() / 1000)));
 
 }
 
