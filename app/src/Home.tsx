@@ -4,11 +4,11 @@ import jsonData from "./assets/data/imageList.json";
 
 
 const App: Component = () => {
-    return (
-     <>
-    <h1 class={styles.title}>
-        <img class={css({ height: "1.5em",width:'auto', display: 'flex' ,marginRight:'2'})} src='/nostr-monoGazo-bot/images/2.png' alt='₍ ･ᴗ･ ₎'/> monoGazo List
-        
+  return (
+    <>
+      <h1 class={styles.title}>
+        <img class={css({ height: "1.5em", width: 'auto', display: 'flex', marginRight: '2' })} src='/nostr-monoGazo-bot/images/2.png' alt='₍ ･ᴗ･ ₎' /> monoGazo List
+
       </h1>
       <p class={css({ paddingBottom: 2 })}>nostrの もの画像BOT<a target="_blank"
         rel="noopener noreferrer" href={`https://nostter.vercel.app/npub1lxrlhyrfdl9sjdvx9xhwhag4d6s95sz3q8z09kgzp0cz73l2ffys9p726u`}>
@@ -19,7 +19,14 @@ const App: Component = () => {
         <div class={styles.imageList}>
           {jsonData.map((item, index) => (
             <div class={styles.imageItem}>
-              <img src={item.url} alt={`Image ${index}`} />
+              {item.url.endsWith('.mov') || item.url.endsWith('.mp4') || item.url.endsWith('.avi') ? (
+                <video controls width="200">
+                  <source src={item.url} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <img src={item.url} alt={`Image ${index}`} />
+              )}
               <div class={styles.imageInfo}>
                 <p>
                   <b>No.{index}</b> {item.date}<a target="_blank"
@@ -37,52 +44,51 @@ const App: Component = () => {
       )
       }
     </ >
-    )
+  )
 }
 
 export default App;
 
 
 const styles = {
-    header:css({
-    
-    }),
-    link:css({
-    
-    }),
-      linkIcon: css({
-        display: 'inline-block',
-        marginRight: '4px', // アイコンとテキストの間隔を調整
-        verticalAlign: 'top', // アイコンをテキストと中央揃え
-      }),
-      title: css({
-        fontSize: '2rem',
-        fontWeight: 'bold',
-        marginBottom: '20px',
-        display: 'flex',
-        marginTop:'20px',
-      }),
-      imageList: css({
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-        gap: '20px',
-      }),
-      imageItem: css({
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '10px',
-        border: '1px solid #ddd',
-        borderRadius: '5px',
-      }),
-      imageInfo: css({
-        marginTop: '10px',
-      }),
-      noData: css({
-        fontSize: '1.2rem',
-        color: 'gray',
-        textAlign: 'center',
-        marginTop: '20px',
-      }),
-    };
-    
+  header: css({
+
+  }),
+  link: css({
+
+  }),
+  linkIcon: css({
+    display: 'inline-block',
+    marginRight: '4px', // アイコンとテキストの間隔を調整
+    verticalAlign: 'top', // アイコンをテキストと中央揃え
+  }),
+  title: css({
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    marginBottom: '20px',
+    display: 'flex',
+    marginTop: '20px',
+  }),
+  imageList: css({
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+    gap: '20px',
+  }),
+  imageItem: css({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '10px',
+    border: '1px solid #ddd',
+    borderRadius: '5px',
+  }),
+  imageInfo: css({
+    marginTop: '10px',
+  }),
+  noData: css({
+    fontSize: '1.2rem',
+    color: 'gray',
+    textAlign: 'center',
+    marginTop: '20px',
+  }),
+};
