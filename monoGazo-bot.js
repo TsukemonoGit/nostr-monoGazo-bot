@@ -1,5 +1,4 @@
 import 'websocket-polyfill'
-import { Octokit } from "@octokit/core";
 import { createRxNostr, createRxForwardReq, verify, uniq, now, completeOnTimeout } from "rx-nostr";
 import { delay, filter } from "rxjs";
 import { nip19 } from 'nostr-tools';
@@ -14,9 +13,9 @@ import { readFile, writeFile } from 'fs/promises'
 const urlList = JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
 //const urlList = JSON.parse(await readFile('./app/src/assets/data/imageList.json'));  //JSONで読み込む方
 
-const octokit = new Octokit({
-  auth: `${process.env.TOKEN}`
-});
+// const octokit = new Octokit({
+//   auth: `${process.env.TOKEN}`
+// });
 
 const nsec = process.env.NSEC;
 const npub = process.env.PUBHEX;
@@ -24,7 +23,7 @@ const accessToken = process.env.TOKEN;
 const scriptPath = process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
 const rxNostr = createRxNostr();
-await rxNostr.switchRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp", "wss://relay-jp.nostr.moctane.com"]);
+await rxNostr.switchRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp"]);//, "wss://relay-jp.nostr.moctane.com"]);
 
 const rxReq = createRxForwardReq();
 
@@ -35,7 +34,6 @@ const observable = rxNostr.use(rxReq)
     verify(),
     // Uniq by event hash
     uniq(),
-
 
   );
 
@@ -54,17 +52,21 @@ const postEvent = async (kind, content, tags, created_at) => {//}:EventData){
     tags: tags,
     pubkey: npub,
     created_at: created_at
-  }, { seckey: nsec }).subscribe({
-    next: ({ from }) => {
-      console.log("OK", from);
-    },
-    complete: () => {
-      console.log("Send complete");
-    },
-    error: (error) => {
-      console.log(error)
-    }
-  });
+  }, { seckey: nsec })
+    .subscribe((packet) => {
+      console.log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
+    });
+  //.subscribe({
+  //   next: ({ from }) => {
+  //     console.log("OK", from);
+  //   },
+  //   complete: () => {
+  //     console.log("Send complete");
+  //   },
+  //   error: (error) => {
+  //     console.log(error)
+  //   }
+  // });
 }
 
 const postRepEvent = async (event, content, tags) => {//}:EventData){
@@ -89,14 +91,17 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
     tags: combinedTags,
     pubkey: npub,
     created_at: Math.max(event.created_at + 1, Math.floor(Date.now() / 1000))
-  }, { seckey: nsec }).subscribe({
-    next: ({ from }) => {
-      console.log("OK", from);
-    },
-    complete: () => {
-      console.log("Send complete");
-    }
+  }, { seckey: nsec }).subscribe((packet) => {
+    console.log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
   });
+  //.subscribe({
+  //   next: ({ from }) => {
+  //     console.log("OK", from);
+  //   },
+  //   complete: () => {
+  //     console.log("Send complete");
+  //   }
+  // });
 }
 
 postEvent(1, "₍ ･ᴗ･ ₎", []);
@@ -106,11 +111,11 @@ postEvent(1, "₍ ･ᴗ･ ₎", []);
 const subscription = observable.subscribe(async (packet) => {
   // Your minimal application!
   if (packet.event.pubkey === "f987fb90696fcb09358629aeebf5156ea05a405101c4f2d9020bf02f47ea4a49") { return; }
-  console.log(packet);
+  // console.log(packet);
   const content = packet.event.content.trim();
   //console.log(packet);
   if (packet.event.tags.some(item => item[0] === "p" && item.includes("f987fb90696fcb09358629aeebf5156ea05a405101c4f2d9020bf02f47ea4a49"))) {
-    console.log("リプきたよ");
+    // console.log("リプきたよ");
 
     // "comand"の部分を抽出
     const commandList = packet.event.content.split(/[ 　\n]/);
