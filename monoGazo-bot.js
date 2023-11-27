@@ -329,7 +329,7 @@ function profileChange(packet) {
     website: "https://tsukemonogit.github.io/nostr-monoGazo-bot/",
     about: "ものが集めた画像\nmono画像\nあるんふぉふぉ\nこれ入れてとか\n入れないでとかあったら\nどうにかこうにかお伝え下さい",
     nip05: "mono_gazo@tsukemonoGit.github.io",
-    lud16: "",
+    lud16: "tsukemono@getalby.com",
   }
   postEvent(0, JSON.stringify(metadata), []);
 
