@@ -76,10 +76,13 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
     ["e", event.id]];
 
   const root = event.tags?.find((item) => item[item.length - 1] === "root");
-
+  const warning = event.tags?.find((item) => item[0] === "content-warning");
   // rootが見つかった場合、tagsにrootを追加
   if (root) {
     tag.push(root);
+  }
+  if (warning) {
+    tag.push(warning);
   }
   // 新しい変数combinedTagsにtagとtagsを結合した結果を格納
   const combinedTags = tag.concat(tags);
