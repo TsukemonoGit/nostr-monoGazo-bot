@@ -11,7 +11,7 @@ const App: Component = () => {
 
       </h1>
       <p class={css({ paddingBottom: 2 })}>nostrの もの画像BOT<a target="_blank"
-        rel="noopener noreferrer" href={`https://nostter.vercel.app/npub1lxrlhyrfdl9sjdvx9xhwhag4d6s95sz3q8z09kgzp0cz73l2ffys9p726u`}>
+        rel="noopener noreferrer" href={`https://nostter.app/npub1lxrlhyrfdl9sjdvx9xhwhag4d6s95sz3q8z09kgzp0cz73l2ffys9p726u`}>
         <svg class={styles.linkIcon} xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16">
           <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z" fill="#0000FF" />
         </svg></a>が集めた画像たち</p>
@@ -30,7 +30,7 @@ const App: Component = () => {
               <div class={styles.imageInfo}>
                 <p>
                   <b>No.{index}</b> {item.date}<a target="_blank"
-                    rel="noopener noreferrer" href={`https://nostter.vercel.app/${item.note}`}>
+                    rel="noopener noreferrer" href={`https://nostter.app/${item.note}`}>
                     <svg class={styles.linkIcon} xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16">
                       <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z" fill="#0000FF" />
                     </svg></a>
