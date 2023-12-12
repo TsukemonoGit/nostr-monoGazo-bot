@@ -41,6 +41,8 @@ jekyllは無限に
 
 なんももわからん
 
+settings→pages → build and deployment を Githubactions に変更？
+
 本体起動時に起動, 一日一回再起動
 crontab -e
 @reboot sudo supervisorctl start monoGazo
