@@ -38,10 +38,8 @@ jekyllは無限に
                     No such file or directory @ dir_chdir - /github/workspace/docs
 ```
 ってなってる
-
-なんももわからん
-
 settings→pages → build and deployment を Githubactions に変更？
+でエラー消えたかも！
 
 本体起動時に起動, 一日一回再起動
 crontab -e
