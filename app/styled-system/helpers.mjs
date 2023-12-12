@@ -49,17 +49,19 @@ function toHash(value) {
 
 // src/merge-props.ts
 function mergeProps(...sources) {
-  const result = {};
-  for (const source of sources) {
-    for (const [key, value] of Object.entries(source)) {
-      if (isObject(value)) {
-        result[key] = mergeProps(result[key] || {}, value);
+  const objects = sources.filter(Boolean);
+  return objects.reduce((prev, obj) => {
+    Object.keys(obj).forEach((key) => {
+      const prevValue = prev[key];
+      const value = obj[key];
+      if (isObject(prevValue) && isObject(value)) {
+        prev[key] = mergeProps(prevValue, value);
       } else {
-        result[key] = value;
+        prev[key] = value;
       }
-    }
-  }
-  return result;
+    });
+    return prev;
+  }, {});
 }
 
 // src/walk-object.ts
@@ -110,7 +112,7 @@ function normalizeShorthand(styles, context) {
     }
   });
 }
-function normalizeStyleObject(styles, context) {
+function normalizeStyleObject(styles, context, shorthand = true) {
   const { utility, conditions } = context;
   const { hasShorthand, resolveShorthand } = utility;
   return walkObject(
@@ -120,9 +122,7 @@ function normalizeStyleObject(styles, context) {
     },
     {
       stop: (value) => Array.isArray(value),
-      getKey: (prop) => {
-        return hasShorthand ? resolveShorthand(prop) : prop;
-      }
+      getKey: shorthand ? (prop) => hasShorthand ? resolveShorthand(prop) : prop : void 0
     }
   );
 }
@@ -210,7 +210,7 @@ var hypenateProperty = memo((property) => {
 });
 
 // src/slot.ts
-var getSlotRecipes = (recipe) => {
+var getSlotRecipes = (recipe = {}) => {
   const init = (slot) => ({
     className: [recipe.className, slot].filter(Boolean).join("__"),
     base: recipe.base?.[slot] ?? {},
@@ -218,7 +218,8 @@ var getSlotRecipes = (recipe) => {
     defaultVariants: recipe.defaultVariants ?? {},
     compoundVariants: recipe.compoundVariants ? getSlotCompoundVariant(recipe.compoundVariants, slot) : []
   });
-  const recipeParts = recipe.slots.map((slot) => [slot, init(slot)]);
+  const slots = recipe.slots ?? [];
+  const recipeParts = slots.map((slot) => [slot, init(slot)]);
   for (const [variantsKey, variantsSpec] of Object.entries(recipe.variants ?? {})) {
     for (const [variantKey, variantSpec] of Object.entries(variantsSpec)) {
       recipeParts.forEach(([slot, slotRecipe]) => {
@@ -249,6 +250,9 @@ function splitProps(props, ...keys) {
   const fn = (key) => split(Array.isArray(key) ? key : dKeys.filter(key));
   return keys.map(fn).concat(split(dKeys));
 }
+
+// src/uniq.ts
+var uniq = (...items) => items.filter(Boolean).reduce((acc, item) => Array.from(/* @__PURE__ */ new Set([...acc, ...item])), []);
 export {
   compact,
   createCss,
@@ -264,6 +268,7 @@ export {
   mergeProps,
   splitProps,
   toHash,
+  uniq,
   walkObject,
   withoutSpace
 };
