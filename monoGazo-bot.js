@@ -107,7 +107,7 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
   // });
 }
 
-postEvent(1, "₍ ･ᴗ･ ₎", []);
+postEvent(42, "₍ ･ᴗ･ ₎", [["e", "5b0703f5add2bb9e636bcae1ef7870ba6a591a93b6b556aca0f14b0919006598", "", "root"]]);
 
 
 // Start subscription
