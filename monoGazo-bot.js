@@ -138,11 +138,14 @@ const subscription = observable.subscribe(async (packet) => {
       //------------------------------------------------
       case filteredCommands[0] === "もの画像" || filteredCommands[0] === "mono画像":
         if (filteredCommands.length <= 1) {
+          //リプで index指定なし のもの画像
+          //#もの画像 URL 作者 作成日 index
           const urlIndex = Math.floor(Math.random() * urlList.length);
           const tags = [
             ["r", urlList[urlIndex].url],
             ["t", "もの画像"]
           ];
+
           postRepEvent(packet.event, `#もの画像\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} (${urlList[urlIndex].date}) ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} \n(index:${urlIndex})`, tags);
         } else if (filteredCommands[1] === "length" || filteredCommands[1] === "長さ" || filteredCommands[1] === "枚数") {
 
@@ -150,6 +153,9 @@ const subscription = observable.subscribe(async (packet) => {
           postRepEvent(packet.event, `もの画像は今全部で${urlList.length}枚あるよ`, []);
 
         } else {
+          //リプで index指定 のもの画像
+          //#もの画像 URL note
+
           const numberValue = Number(filteredCommands[1]);
           if (!isNaN(numberValue)) {
             if (numberValue < urlList.length && numberValue >= 0) {
@@ -158,7 +164,8 @@ const subscription = observable.subscribe(async (packet) => {
                 ["r", urlList[numberValue].url],
                 ["t", "もの画像"]
               ];
-              postRepEvent(packet.event, `#もの画像\n${urlList[numberValue].url}\n作: nostr:${urlList[numberValue].author} (${urlList[numberValue].date}) ${urlList[numberValue].memo ? " (" + urlList[numberValue].memo + ")" : ""} `, tags);
+
+              postRepEvent(packet.event, `#もの画像\n${urlList[numberValue].url}\n作: nostr:${urlList[numberValue].author} (${urlList[numberValue].date}) ${urlList[numberValue].memo ? " (" + urlList[numberValue].memo + ")" : ""} \nnostr:${urlList[numberValue].note}`, tags);
             } else {
               postRepEvent(packet.event, "そんなのないよ", []);
             }
