@@ -1,6 +1,6 @@
 import { css } from '../styled-system/css';
-import { createSignal, onCleanup, type Component, onMount } from 'solid-js';
-import jsonData from "./assets/data/imageList.json";
+import { createSignal, type Component, onMount } from 'solid-js';
+
 
 interface Entry {
   id: string;
