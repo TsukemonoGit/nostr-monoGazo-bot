@@ -1,12 +1,12 @@
 import { css } from '../styled-system/css';
 import type { Component } from 'solid-js';
 
-import { A, Routes, Route } from "@solidjs/router"; // 👈 Import the A component
+
 import Contact from './Contact';
 import About from './About';
 import Home from './Home';
 import style from "./App.module.css"; // import文を変更
-
+import { A, Router, Route, Routes } from "@solidjs/router"; // 👈 Import the A component
 
 
 
