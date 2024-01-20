@@ -34,17 +34,17 @@ const Rss: Component = () => {
   }
 
   // コンポーネントがマウントされたときにRSSデータを取得
-  onMount(() => {
-    fetchRssData("https://njump.me/npub1lxrlhyrfdl9sjdvx9xhwhag4d6s95sz3q8z09kgzp0cz73l2ffys9p726u.rss");
+  onMount(async () => {
+    await fetchRssData("https://njump.me/npub1lxrlhyrfdl9sjdvx9xhwhag4d6s95sz3q8z09kgzp0cz73l2ffys9p726u.rss");
   });
 
   return (
-    <div class={styles.rss}>
-      <h2 class={styles.rssTitle}>Nostr もの画像 Posts</h2>
-      <div class={styles.rssContainer}>
+    <div class={styless.rss}>
+      <h2 class={styless.rssTitle}>Nostr もの画像 Posts</h2>
+      <div class={styless.rssContainer}>
 
         {rssData().map((entry, index) => (
-          <div class={styles.rssEntry}>
+          <div class={styless.rssEntry}>
 
 
             <a href={entry.link} target="_blank" rel="noopener noreferrer">
@@ -63,7 +63,7 @@ const Rss: Component = () => {
 export default Rss;
 
 
-const styles = {
+const styless = {
   rssTitle: css({
     margin: '5px 10px 0 10px',
     fontWeight: 'bolder'
