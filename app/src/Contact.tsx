@@ -6,7 +6,7 @@ import { css } from "../styled-system/css";
 
 
 const App: Component = () => {
-  return (<>
+  return (<div class={style.container}>
     <h1 class={styles.title}>ほか</h1>
     <h3 class={styles.h3}>リンク</h3>
     <div class={styles.item}><a class={styles.link} href="https://nostter.vercel.app/mono_gazo@tsukemonoGit.github.io" target="_blank" // 新しいタブでリンクを開く設定
@@ -37,9 +37,17 @@ const App: Component = () => {
       <p class={css({ marginTop: '10' })}>//管理者のためだけの画像追加用のやつ</p>
       <MakeAddJson />
     </div>
-  </>
+  </div>
   )
 }
 
 export default App;
 
+const style = {
+  container: css({
+    fontFamily: 'Arial, sans-serif',
+    padding: '20px',
+    maxWidth: '800px',
+    margin: '0 auto',
+  }),
+};

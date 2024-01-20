@@ -26,7 +26,7 @@ const App: Component = () => {
         <A href="/about" class={css({ width: 'full', textAlign: 'center' })} onClick={scrollToTop}>About</A> {/* 👈 Add a link to the about page */}
         <A href="/contact" class={css({ width: 'full', textAlign: 'center' })} onClick={scrollToTop}>ほか</A> {/* 👈 Add a link to the contact page */}
       </header>
-      <div class={styles.container}>
+      <div >
         <Routes>
           <Route path="/" component={Home} />
           <Route path="/about" component={About} />

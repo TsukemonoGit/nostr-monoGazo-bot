@@ -1,49 +1,53 @@
 import { css } from '../styled-system/css';
 import type { Component } from 'solid-js';
 import jsonData from "./assets/data/imageList.json";
+import Rss from './Rss';
 
 
 const App: Component = () => {
   return (
-    <>
-      <h1 class={styles.title}>
-        <img class={css({ height: "1.5em", width: 'auto', display: 'flex', marginRight: '2' })} src='/nostr-monoGazo-bot/images/2.png' alt='₍ ･ᴗ･ ₎' /> monoGazo List
+    <div class={styles.appContainer}>
+      <div class={styles.container}>
+        <h1 class={styles.title}>
+          <img class={css({ height: "1.5em", width: 'auto', display: 'flex', marginRight: '2' })} src='/nostr-monoGazo-bot/images/2.png' alt='₍ ･ᴗ･ ₎' /> monoGazo List
 
-      </h1>
-      <p class={css({ paddingBottom: 2 })}>nostrの もの画像BOT<a target="_blank"
-        rel="noopener noreferrer" href={`https://nostter.app/npub1lxrlhyrfdl9sjdvx9xhwhag4d6s95sz3q8z09kgzp0cz73l2ffys9p726u`}>
-        <svg class={styles.linkIcon} xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16">
-          <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z" fill="#0000FF" />
-        </svg></a>が集めた画像たち</p>
-      {jsonData && jsonData.length > 0 ? (
-        <div class={styles.imageList}>
-          {jsonData.map((item, index) => (
-            <div class={styles.imageItem}>
-              {item.url.endsWith('.mov') || item.url.endsWith('.mp4') || item.url.endsWith('.avi') ? (
-                <video controls width="200">
-                  <source src={item.url} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-              ) : (
-                <img src={item.url} alt={`Image ${index}`} />
-              )}
-              <div class={styles.imageInfo}>
-                <p>
-                  <b>No.{index}</b> {item.date}<a target="_blank"
-                    rel="noopener noreferrer" href={`https://nostter.app/${item.note}`}>
-                    <svg class={styles.linkIcon} xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16">
-                      <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z" fill="#0000FF" />
-                    </svg></a>
-                </p>
+        </h1>
+        <p class={css({ paddingBottom: 2 })}>nostrの もの画像BOT<a target="_blank"
+          rel="noopener noreferrer" href={`https://nostter.app/npub1lxrlhyrfdl9sjdvx9xhwhag4d6s95sz3q8z09kgzp0cz73l2ffys9p726u`}>
+          <svg class={styles.linkIcon} xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16">
+            <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z" fill="#0000FF" />
+          </svg></a>が集めた画像たち</p>
+        {jsonData && jsonData.length > 0 ? (
+          <div class={styles.imageList}>
+            {jsonData.map((item, index) => (
+              <div class={styles.imageItem}>
+                {item.url.endsWith('.mov') || item.url.endsWith('.mp4') || item.url.endsWith('.avi') ? (
+                  <video controls width="200">
+                    <source src={item.url} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <img src={item.url} alt={`Image ${index}`} />
+                )}
+                <div class={styles.imageInfo}>
+                  <p>
+                    <b>No.{index}</b> {item.date}<a target="_blank"
+                      rel="noopener noreferrer" href={`https://nostter.app/${item.note}`}>
+                      <svg class={styles.linkIcon} xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 -960 960 960" width="16">
+                        <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z" fill="#0000FF" />
+                      </svg></a>
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p class={styles.noData}>No data available.</p>
-      )
-      }
-    </ >
+            ))}
+          </div>
+        ) : (
+          <p class={styles.noData}>No data available.</p>
+        )
+        }
+      </div>
+      <Rss />
+    </ div>
   )
 }
 
@@ -51,6 +55,26 @@ export default App;
 
 
 const styles = {
+  appContainer: css({
+    display: 'flex',
+    flexDirection: 'row', // デフォルトは横に並べる
+    flexWrap: 'wrap', // コンポーネントが横幅を超えた場合に折り返す
+    justifyContent: 'space-between', // コンポーネント間のスペースを最大化
+
+  }),
+
+  container: css({
+    // maxHeight: "screen",
+    // overflowY: 'auto',
+    padding: '20px',
+    maxWidth: '1000px',
+    margin: '0 auto',
+    '@media (min-width: 800px) and (max-width: 1500px) ': {
+      marginRight: '15em',
+
+    }
+  }),
+
   header: css({
 
   }),
