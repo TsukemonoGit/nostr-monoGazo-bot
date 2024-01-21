@@ -8,6 +8,16 @@ interface Entry {
   content: string;
   updated: string;
 }
+
+const toLocalTime = (time: string) => {
+  // ISO 8601形式の日時をパース
+  const dateTime = new Date(time);
+
+  // ローカルのタイムゾーンに変換
+  return dateTime.toLocaleString();
+
+
+}
 const Rss: Component = () => {
   const [rssData, setRssData] = createSignal<Entry[]>([]); // 初期値を空の配列に変更
 
@@ -47,12 +57,12 @@ const Rss: Component = () => {
           <div class={styless.rssEntry}>
 
 
-            <a href={entry.link} target="_blank" rel="noopener noreferrer">
-              もの画像 <p> {entry.updated}</p>
-              <div innerHTML={entry.content} />
+
+            <a href={entry.link} target="_blank" rel="noopener noreferrer"> {toLocalTime(entry.updated)}</a>
+            <div innerHTML={entry.content} />
 
 
-            </a>
+
           </div>
         ))}
       </div></div>
@@ -65,10 +75,12 @@ export default Rss;
 
 const styless = {
   rssTitle: css({
-    margin: '5px 10px 0 10px',
-    fontWeight: 'bolder'
+    margin: '0 auto',
+    fontWeight: 'bolder',
+
   }),
   rss: css({
+
     backgroundColor: 'amber.300',
     //width: '100%', // デフォルトは100%、画面の横幅いっぱいに表示
     order: 2, // デフォルトは2、画面が広いときは右側に表示
@@ -78,14 +90,14 @@ const styless = {
       top: '4em',
       bottom: '2em',
       right: '5px',
-      width: "15em",
+      width: "18em",
     },
     '@media (min-width: 1500px)': {
       position: 'fixed',
       top: '4em',
       bottom: '2em',
       right: '15px',
-      width: "15em",
+      width: "18em",
 
     },
     margin: '5px',
@@ -96,23 +108,34 @@ const styless = {
     //maxHeight: "screen",
     maxWidth: "screen",
     // maxHeight: "40em",
-
+    '& a': {
+      textDecoration: 'underline'
+    },
+    '& blockquote': {
+      border: '1px solid #ddd',
+      borderRadius: '10px',
+      padding: '10px'
+    }
   }),
   rssContainer: css({
     //backgroundColor: 'rgba(255, 255, 255, 0.8)',
     //maxWidth: "20em",
     maxHeight: "screen",
     overflowY: 'auto',
+    overflowX: 'hidden',
+
   }),
   rssEntry: css({
+    overflowX: 'none',
     backgroundColor: 'white',
-    margin: ' 10px',
+    margin: '0px 10px 10px 10px',
     padding: '5px',
     border: '1px solid #ddd',
     borderRadius: '5px',
     marginBottom: '10px',
-    '& img': {
-      maxWidth: '12em',
+    '& img , video': {
+      maxWidth: 'full',
+      width: '15em'
     },
   }),
 };
