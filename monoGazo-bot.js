@@ -23,7 +23,7 @@ const accessToken = process.env.TOKEN;
 const scriptPath = process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
 const rxNostr = createRxNostr();
-await rxNostr.switchRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp"]);//, "wss://relay-jp.nostr.moctane.com"]);
+await rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp"]);//, "wss://relay-jp.nostr.moctane.com"]);
 
 const rxReq = createRxForwardReq();
 
@@ -46,6 +46,7 @@ rxNostr.createConnectionStateObservable().pipe(
 ).subscribe((packet) => { rxNostr.reconnect(packet.from) });
 
 const postEvent = async (kind, content, tags, created_at) => {//}:EventData){
+
   const res = rxNostr.send({
     kind: kind,
     content: content,
@@ -184,6 +185,53 @@ const subscription = observable.subscribe(async (packet) => {
           // relay再起動のコード
         }
         break;
+      //------------------------------------------------
+      //あるふぉふぉをもらう
+      case /(あるん|ある)ふぉふぉ?(下さい|ください|頂戴|ちょうだい).?/.test(filteredCommands[0]):
+        try {
+
+
+          console.log(packet.event.id);
+          const tags = [
+            ["r", "https://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png"],
+            ["t", "もの画像"]];
+          postRepEvent(packet.event, `あるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像`, tags);
+        } catch (error) {
+          postEvent(1, "失敗したかも", []);
+          console.log(error);
+        }
+
+        break;
+      //------------------------------------------------
+      //あるふぉふぉをTLにあげる
+      case /(あるん|ある)ふぉふぉ?(あげて).?/.test(filteredCommands[0]):
+
+        try {
+
+          console.log(packet.event.id);
+          const tags = [
+            ["r", "https://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png"],
+            ["t", "もの画像"]];
+
+          const root = packet.event.tags?.find((item) => item[item.length - 1] === "root");
+          const warning = packet.event.tags?.find((item) => item[0] === "content-warning");
+          // rootが見つかった場合、tagsにrootを追加
+          if (root) {
+            tags.push(root);
+          }
+          if (warning) {
+            tags.push(warning);
+          }
+
+
+          postEvent(packet.event.kind, `あるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像`, tags);
+        } catch (error) {
+          postEvent(1, "失敗したかも", []);
+          console.log(error);
+        }
+
+        break;
+
       //------------------------------------------------
       case filteredCommands[0].startsWith('nostr:'):
         const content = filteredCommands.slice(1).join('');
