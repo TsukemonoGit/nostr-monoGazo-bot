@@ -1,4 +1,4 @@
-import 'websocket-polyfill'
+import WebSocket from 'ws';
 import { createRxNostr, createRxForwardReq, verify, uniq, now, completeOnTimeout } from "rx-nostr";
 import { delay, filter } from "rxjs";
 import { nip19 } from 'nostr-tools';
@@ -17,8 +17,8 @@ const npub = process.env.PUBHEX;
 const accessToken = process.env.TOKEN;
 const scriptPath = process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
-const rxNostr = createRxNostr();
-rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp"]);//, "wss://relay-jp.nostr.moctane.com"]);
+const rxNostr = createRxNostr({ websocketCtor: WebSocket });
+rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp", "wss://relay-jp.nostr.moctane.com"]);
 
 const rxReq = createRxForwardReq();
 
