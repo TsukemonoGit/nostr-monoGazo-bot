@@ -4,18 +4,13 @@ import { delay, filter } from "rxjs";
 import { nip19 } from 'nostr-tools';
 import env from "dotenv";
 env.config();
-//import { urlList } from './imageList.js';   //JSを読み込む方
+
 import { exec } from 'child_process'
-//import { execSync } from 'child_process';
-//const { exec } = require('child_process')
+
 import { readFile, writeFile } from 'fs/promises'
 
 const urlList = JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
-//const urlList = JSON.parse(await readFile('./app/src/assets/data/imageList.json'));  //JSONで読み込む方
 
-// const octokit = new Octokit({
-//   auth: `${process.env.TOKEN}`
-// });
 
 const nsec = process.env.NSEC;
 const npub = process.env.PUBHEX;
@@ -23,7 +18,7 @@ const accessToken = process.env.TOKEN;
 const scriptPath = process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
 const rxNostr = createRxNostr();
-await rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp"]);//, "wss://relay-jp.nostr.moctane.com"]);
+rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp"]);//, "wss://relay-jp.nostr.moctane.com"]);
 
 const rxReq = createRxForwardReq();
 
@@ -46,28 +41,26 @@ rxNostr.createConnectionStateObservable().pipe(
 ).subscribe((packet) => { rxNostr.reconnect(packet.from) });
 
 const postEvent = async (kind, content, tags, created_at) => {//}:EventData){
+  try {
+    const res = rxNostr.send({
+      kind: kind,
+      content: content,
+      tags: tags,
+      pubkey: npub,
+      created_at: created_at
+    }, { seckey: nsec })
+      .subscribe({
+        next: (packet) => {
+          console.log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
+        },
+        error: (error) => {
+          console.log("Error");
+        }
+      });
+  } catch (error) {
+    console.log(error);
+  }
 
-  const res = rxNostr.send({
-    kind: kind,
-    content: content,
-    tags: tags,
-    pubkey: npub,
-    created_at: created_at
-  }, { seckey: nsec })
-    .subscribe((packet) => {
-      console.log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
-    });
-  //.subscribe({
-  //   next: ({ from }) => {
-  //     console.log("OK", from);
-  //   },
-  //   complete: () => {
-  //     console.log("Send complete");
-  //   },
-  //   error: (error) => {
-  //     console.log(error)
-  //   }
-  // });
 }
 
 const postRepEvent = async (event, content, tags) => {//}:EventData){
@@ -88,24 +81,25 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
   // 新しい変数combinedTagsにtagとtagsを結合した結果を格納
   const combinedTags = tag.concat(tags);
 
+  try {
+    const res = rxNostr.send({
+      kind: event.kind,
+      content: content,
+      tags: combinedTags,
+      pubkey: npub,
+      created_at: Math.max(event.created_at + 1, Math.floor(Date.now() / 1000))
+    }, { seckey: nsec }).subscribe({
+      next: (packet) => {
+        console.log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
+      },
+      error: (error) => {
+        console.log("Error");
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
 
-  const res = rxNostr.send({
-    kind: event.kind,
-    content: content,
-    tags: combinedTags,
-    pubkey: npub,
-    created_at: Math.max(event.created_at + 1, Math.floor(Date.now() / 1000))
-  }, { seckey: nsec }).subscribe((packet) => {
-    console.log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
-  });
-  //.subscribe({
-  //   next: ({ from }) => {
-  //     console.log("OK", from);
-  //   },
-  //   complete: () => {
-  //     console.log("Send complete");
-  //   }
-  // });
 }
 
 postEvent(42, "₍ ･ᴗ･ ₎", [["e", "5b0703f5add2bb9e636bcae1ef7870ba6a591a93b6b556aca0f14b0919006598", "", "root"]]);
