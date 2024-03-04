@@ -303,8 +303,8 @@ const subscription = observable.subscribe(async (packet) => {
         }
         break;
       default:
-        console.log("defaultのとこ");
-        postRepEvent(packet.event, "₍ ･ᴗ･ ₎", []);
+        console.log("defaultのとこ");//リプの何にでも反応してたらボットに反応して無限連鎖の可能性あるからなしにしてみる
+        //postRepEvent(packet.event, "₍ ･ᴗ･ ₎", []);
         break;
     }
   }
