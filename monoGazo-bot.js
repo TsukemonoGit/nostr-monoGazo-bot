@@ -102,7 +102,7 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
 
 }
 
-postEvent(42, "₍ ･ᴗ･ ₎", [["e", "5b0703f5add2bb9e636bcae1ef7870ba6a591a93b6b556aca0f14b0919006598", "", "root"]]);
+postEvent(7, ":monosimple:", [["e", "77cc687ee2a47078c914a5967518f45f29dba092104bb2e1859d4640ea04069e"], ["emoji", "monosimple", "https://i.imgur.com/n0Cqc5T.png"]]);
 
 
 // Start subscription
