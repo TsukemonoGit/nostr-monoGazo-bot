@@ -55,7 +55,7 @@ const writeRelays = () => {
       arr.push(key);
       return arr;
     }, []);
-  if (arr.length < 1) {
+  if (connectedRelaysArray.length < 1) {
     console.log("書込み可能なリレーがないかも");
   }
   //console.log(connectedRelaysArray);
