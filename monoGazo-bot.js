@@ -1,22 +1,22 @@
 import WebSocket from 'ws';
-import { createRxNostr, createRxForwardReq, verify, uniq, now, completeOnTimeout } from "rx-nostr";
+import { createRxNostr, createRxForwardReq, verify, uniq, now } from "rx-nostr";
 import { delay, filter } from "rxjs";
 import { nip19 } from 'nostr-tools';
 import env from "dotenv";
 env.config();
 
 import { exec } from 'child_process'
-
 import { readFile, writeFile } from 'fs/promises'
+import { isGeneratorFunction } from 'util/types';
 
 const urlList = JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
-
 
 const nsec = process.env.NSEC;
 const npub = process.env.PUBHEX;
 const accessToken = process.env.TOKEN;
 const scriptPath = process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
+
 const rxNostr = createRxNostr({ websocketCtor: WebSocket });
 rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp", "wss://relay-jp.nostr.moctane.com"]);
 
@@ -32,23 +32,46 @@ const observable = rxNostr.use(rxReq)
 
   );
 
-//リレーの接続監視、エラーだったら1分待って再接続する
+//リレーの接続監視、エラーだったら10分待って再接続する
 rxNostr.createConnectionStateObservable().pipe(
   //when an error pachet is received
   filter((packet) => packet.state === "error"),
   //wait one minute
-  delay(60 * 1000)
+  delay(60 * 10000)
 ).subscribe((packet) => { rxNostr.reconnect(packet.from) });
 
+
+//書き込む前に書き込めるリレーを確認してみる
+const writeRelays = () => {
+  const allRelayStatus = rxNostr.getAllRelayStatus(); // 連想配列を取得
+  //console.log(allRelayStatus);
+  //connected以外があるときだけ一次リレー設定しようかと思ったけどとりあえず
+  // const hasDisconnectedRelay = Object.values(allRelayStatus).some(
+  //   relay => relay.status !== "connected"
+  // );
+  const connectedRelaysArray = Object.entries(allRelayStatus)
+    .filter(([key, value]) => value.connection === "connected")
+    .reduce((arr, [key, value]) => {
+      arr.push(key);
+      return arr;
+    }, []);
+  if (arr.length < 1) {
+    console.log("書込み可能なリレーがないかも");
+  }
+  //console.log(connectedRelaysArray);
+  return connectedRelaysArray;
+}
 const postEvent = async (kind, content, tags, created_at) => {//}:EventData){
   try {
+
+
     const res = rxNostr.send({
       kind: kind,
       content: content,
       tags: tags,
       pubkey: npub,
       created_at: created_at
-    }, { seckey: nsec })
+    }, { seckey: nsec, relays: writeRelays() })
       .subscribe({
         next: (packet) => {
           console.log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
@@ -88,7 +111,7 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
       tags: combinedTags,
       pubkey: npub,
       created_at: Math.max(event.created_at + 1, Math.floor(Date.now() / 1000))
-    }, { seckey: nsec }).subscribe({
+    }, { seckey: nsec, relays: writeRelays() }).subscribe({
       next: (packet) => {
         console.log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
       },
@@ -101,8 +124,12 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
   }
 
 }
+//起動直後にこれすると接続確立されてないからリレーなしになっちゃうからちょっと遅らせてみる
+setTimeout(() => {
+  postEvent(7, ":monosimple:", [["e", "77cc687ee2a47078c914a5967518f45f29dba092104bb2e1859d4640ea04069e"], ["emoji", "monosimple", "https://i.imgur.com/n0Cqc5T.png"]])
+}
+  , 1000);
 
-postEvent(7, ":monosimple:", [["e", "77cc687ee2a47078c914a5967518f45f29dba092104bb2e1859d4640ea04069e"], ["emoji", "monosimple", "https://i.imgur.com/n0Cqc5T.png"]]);
 
 
 // Start subscription
