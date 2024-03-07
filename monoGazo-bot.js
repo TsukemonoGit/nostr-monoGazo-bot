@@ -128,7 +128,7 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
 setTimeout(() => {
   postEvent(7, ":monosimple:", [["e", "77cc687ee2a47078c914a5967518f45f29dba092104bb2e1859d4640ea04069e"], ["emoji", "monosimple", "https://i.imgur.com/n0Cqc5T.png"]])
 }
-  , 1000);
+  , 5 * 1000);
 
 
 
