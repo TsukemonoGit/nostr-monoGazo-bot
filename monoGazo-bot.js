@@ -18,7 +18,7 @@ const scriptPath = process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
 const point_user = process.env.POINTUSER_PUB_HEX;
 
-const point_regex = /(ポイント|ぽいんと|point)\s*([+-]\d+)\s*(.*)?/;
+const point_regex = /(ポイント|ぽいんと|point)\s*([+-]?\d+)\s*(.*)/;
 let pointData;
 
 try {
@@ -403,12 +403,12 @@ const subscription = observable.subscribe(async (packet) => {
 
       const tags = [["e", packet.event.id], ["p", packet.event.pubkey], ["k", packet.event.kind.toString()]];
       //console.log(tags);
-      postEvent(7, "+", tags);
+      postEvent(7, pointData.allpoint.toString(), tags);
 
     } catch (error) {
 
       const tags = [["e", packet.event.id], ["p", packet.event.pubkey], ["k", packet.event.kind.toString()]];
-      postEvent(7, "-", tags);
+      postEvent(7, "x", tags);
       //console.log(tags);
     }
   }
