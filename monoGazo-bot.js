@@ -16,6 +16,22 @@ const npub = process.env.PUBHEX;
 const accessToken = process.env.TOKEN;
 const scriptPath = process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS.replace(/'/g, '"'));
+const point_user = process.env.POINTUSER_PUB_HEX;
+
+const point_regex = /(ポイント|ぽいんと|point)\s*([+-]\d+)\s*(.*)?/;
+let pointData;
+
+try {
+  pointData = JSON.parse(await readFile('./pointlog.json'));
+} catch (error) {
+  pointData = {
+    allpoint: 0,
+    log: []
+  }
+}
+
+
+
 
 const rxNostr = createRxNostr({ websocketCtor: WebSocket });
 rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp", "wss://relay-jp.nostr.moctane.com"]);
@@ -363,6 +379,38 @@ const subscription = observable.subscribe(async (packet) => {
     const tags = [
       ["r", "https://tsukemonogit.github.io/nostr-monoGazo-bot/"],];
     postRepEvent(packet.event, `₍ ･ᴗ･ ₎っ https://tsukemonogit.github.io/nostr-monoGazo-bot/`, tags);
+
+    //ぽいんとしすてむ
+  } else if (packet.event.pubkey === point_user && (point_regex.test(content))) {
+    console.log("Test");
+    try {
+      // 正規表現にマッチする部分を取得
+      const matches = content.match(point_regex);
+      // ポイントの値を取得
+      const point = parseInt(matches[2]);
+
+      // コメントの値を取得（コメントが指定されていない場合は空文字列）
+      const comment = matches[3] ? matches[3] : "";
+
+      // ログに追加するUNIX時間を年月日時分秒に変換
+      const date = new Date(packet.event.created_at * 1000); // 秒単位のUNIX時間をミリ秒単位に変換
+      const formattedDate = date.toISOString().replace(/T/, ' ').replace(/\..+/, ''); // ISOフォーマットを年月日時分秒に変換
+
+      // 全体のポイントとログを作成
+      pointData.allpoint += point;
+      pointData.log.push({ point: point, comment: comment, date: formattedDate })
+      await writeFile("./pointlog.json", JSON.stringify(pointData, null, 2));
+
+      const tags = [["e", packet.event.id], ["p", packet.event.pubkey], ["k", packet.event.kind.toString()]];
+      //console.log(tags);
+      postEvent(7, "+", tags);
+
+    } catch (error) {
+
+      const tags = [["e", packet.event.id], ["p", packet.event.pubkey], ["k", packet.event.kind.toString()]];
+      postEvent(7, "-", tags);
+      //console.log(tags);
+    }
   }
 });
 
@@ -371,28 +419,6 @@ rxReq.emit({ kinds: [1, 42], since: now });
 
 
 
-//---------------------------------------------func------------------------------------------------
-// function monoGazo(packet, urlIndex, syousai) {
-
-//   console.log("ものがぞうりくえすときました:" + urlIndex);
-//   const tags = [
-//     ["p", packet.event.pubkey],
-//     ["e", packet.event.id],
-//     ["r", urlList[urlIndex].url],
-//     ["t", "もの画像"]];
-
-//   const root = packet.event.tags.find((item) => item[item.length - 1] === "root");
-
-//   // rootが見つかった場合、tagsにrootを追加
-//   if (root) {
-//     tags.push(root);
-//   }
-//   // console.log(packet.event.created_at + 1);
-//   //const created_at = packet.event.created_at + 1;
-//   postEvent(packet.event.kind, `#もの画像\n${urlList[urlIndex].url}\n作: nostr:${urlList[urlIndex].author} (${urlList[urlIndex].date}) ${urlList[urlIndex].memo ? " (" + urlList[urlIndex].memo + ")" : ""} ${syousai ? `\n元: nostr:${urlList[urlIndex].note}` : `\n(index:${urlIndex})`}`, tags, Math.max(packet.event.created_at + 1, Math.floor(Date.now() / 1000)));
-
-
-// }
 
 
 function profileChange(packet) {
@@ -468,67 +494,3 @@ async function gitPush(packet) {
 
 
 }
-
-
-
-// function naifofo(packet) {
-
-//   console.log("ないらしい:");
-//   const tags = [
-//     ["p", packet.event.pubkey],
-//     ["e", packet.event.id],
-//     ["r", "https://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png"],
-//     ["t", "もの画像"]];
-
-//   const root = packet.event.tags.find((item) => item[item.length - 1] === "root");
-
-//   // rootが見つかった場合、tagsにrootを追加
-//   if (root) {
-//     tags.push(root);
-//   }
-//   // console.log(packet.event.created_at + 1);
-//   //const created_at = packet.event.created_at + 1;
-//   //元note: note1hd5rumpdyhc6dm5p3q8ryu5l622jcvd90wk6zpc80834s623rexsgv6mdn
-//   postEvent(packet.event.kind, `あるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像`, tags, Math.max(packet.event.created_at + 1, Math.floor(Date.now() / 1000)));
-
-// }
-
-// function wareki(packet) {
-//   console.log("和暦知りたいらしい");
-//   const tags = [
-//     ["p", packet.event.pubkey],
-//     ["e", packet.event.id]];
-
-//   const root = packet.event.tags.find((item) => item[item.length - 1] === "root");
-
-//   // rootが見つかった場合、tagsにrootを追加
-//   if (root) {
-//     tags.push(root);
-//   }
-//   // console.log(packet.event.created_at + 1);
-//   //const created_at = packet.event.created_at + 1;
-
-//   const now = new Date();
-//   const wareki = now.toLocaleString("ja-JP-u-ca-japanese", { dateStyle: "long" });
-
-//   postEvent(packet.event.kind, `${wareki} らしい`, tags, Math.max(packet.event.created_at + 1, Math.floor(Date.now() / 1000)));
-
-// }
-
-// function monoLen(packet) {
-//   console.log("もの画像の数知りたいらしい");
-//   const tags = [
-//     ["p", packet.event.pubkey],
-//     ["e", packet.event.id]];
-
-//   const root = packet.event.tags.find((item) => item[item.length - 1] === "root");
-
-//   // rootが見つかった場合、tagsにrootを追加
-//   if (root) {
-//     tags.push(root);
-//   }
-//   // console.log(packet.event.created_at + 1);
-//   //const created_at = packet.event.created_at + 1;
-
-//   postEvent(packet.event.kind, `もの画像は今全部で${urlList.length}枚あるよ`, tags, Math.max(packet.event.created_at + 1, Math.floor(Date.now() / 1000)));
-// }
