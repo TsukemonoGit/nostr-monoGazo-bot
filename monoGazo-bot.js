@@ -7,8 +7,7 @@ env.config();
 
 import { exec } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
-import { isGeneratorFunction } from 'util/types';
-import { cachedDataVersionTag } from 'v8';
+
 
 const monoGazoList = JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
 
