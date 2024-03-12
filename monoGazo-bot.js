@@ -376,7 +376,8 @@ const res_arufofo_douzo = (event, regex) => {
   if (match === null) {
     throw new Error();
   }
-  const npub_reply = match[2];
+  const npub_reply = match[1];
+  console.log(match)
   const npub_reply_decode = nip19.decode(npub_reply);
   if (npub_reply_decode.type !== 'npub') {
     throw new TypeError(`${npub_reply} is not npub`);
@@ -393,7 +394,7 @@ const res_arufofo_douzo = (event, regex) => {
     ],
     ["r", "https://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png"],
     ["t", "もの画像"]];
-  const root = packet.event.tags.find((item) => item[item.length - 1] === "root");
+  const root = event.tags.find((item) => item[item.length - 1] === "root");
   const warning = event.tags?.find((item) => item[0] === "content-warning");
   // rootが見つかった場合、tagsにrootを追加
   if (root) {
