@@ -485,12 +485,12 @@ const resmapNormal = [
 const resmapReply = [
   [/和暦/, res_wareki],
   [/(もの|mono)画像\s?(length|長さ|枚数|何枚)/i, res_monoGazo_len],
-  [/(もの|mono)画像\s?(\d)*/i, res_monoGazo],
+  [/(もの|mono)画像\s?(\d+)*/i, res_monoGazo],
   [/(あるん|ある)ふぉふぉ?(下さい|ください|頂戴|ちょうだい).?/, res_arufofo_kure],
   [/(あるん|ある)ふぉふぉ?(あげて).?/, res_arufofo_agete],
   [/(npub\w{59})\s?(さん|ちゃん|くん)?に(.*)(あるんふぉふぉ|あるふぉふぉ)(.*)(を送って|をおくって|送って|おくって|あげて)/, res_arufofo_douzo],
 
   [/(追加|add)(\s.*)({.*})/ism, res_monoGazo_add],//許可されたユーザーかチェックして
-  [/(削除|delete)\s*(\d)*/i, res_monoGazo_delete],//許可されたユーザーかチェックして
+  [/(削除|delete)\s*(\d+)*/i, res_monoGazo_delete],//許可されたユーザーかチェックして
 
 ];
