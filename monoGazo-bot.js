@@ -479,7 +479,7 @@ const resmapNormal = [
 
   [/(もの|mono)画像\s?どこ[?？]?/i, res_monoGazo_doko],
   [/(もの|mono)(画像)?サイト\s?どこ[?？]?/i, res_monoSite_doko],
-  [/(ポイント|ぽいんと|point|p)\s*([+-]?\d+)\s*(.*)/i, res_monoPoint],
+  [/^(ポイント|ぽいんと|point|p)\s+([+-]?\d+)\s+(.*)/i, res_monoPoint],
 ];
 //: [RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => Promise<[string, string[][]]> | [string, string[][]] | null][]
 const resmapReply = [
