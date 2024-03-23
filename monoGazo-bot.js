@@ -19,9 +19,15 @@ const owners = JSON.parse(process.env.ORNERS_HEX.replace(/'/g, '"'));
 const point_user = process.env.POINTUSER_PUB_HEX;
 
 let pointData;
-
+let totalPoints;
 try {
   pointData = JSON.parse(await readFile('./pointlog.json'));
+  // 最初の行（ヘッダー）を除いて、pointの値を抽出し、合計を計算する
+totalPoints = data.slice(1).reduce((total, row) => {
+  // 各行の最初の要素が数値である場合にのみ、その値を合計に加える
+  return total + row[0];
+}, 0);
+
 } catch (error) {
   pointData = [["point","memo","date"]];
   //
@@ -32,7 +38,7 @@ try {
   }
   console.log(`stdout: ${stdout}`)
 })
-
+await writeFile("./pointlog.json", JSON.stringify(pointData, null, 2));
 }
 
 
@@ -300,10 +306,10 @@ const res_monoPoint = async (event, regex) => {
       })
       pointData.push(pushData)
       await writeFile("./pointlog.json", JSON.stringify(pointData, null, 2));
-
+      totalPoints+=point;
       const tags = [["e", event.id], ["p", event.pubkey], ["k", event.kind.toString()]];
       //console.log(tags);
-      postEvent(7, pointData.allpoint.toString(), tags);
+      postEvent(7, totalPoints.toString(), tags);
 
     } catch (error) {
 
