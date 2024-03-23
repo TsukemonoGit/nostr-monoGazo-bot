@@ -46,3 +46,7 @@ crontab -e
 @reboot sudo supervisorctl start monoGazo
 0 0 * * * sudo supervisorctl restart monoGazo
 
+```
+git submodule update --remote
+```
+でサブモジュールの最新を取り込む

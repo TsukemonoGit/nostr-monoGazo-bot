@@ -1,0 +1,3 @@
+[submodule "spreadsheet-auth-edit"]
+	path = spreadsheet-auth-edit
+	url = https://github.com/TsukemonoGit/spreadsheet-auth-edit

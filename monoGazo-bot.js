@@ -23,10 +23,16 @@ let pointData;
 try {
   pointData = JSON.parse(await readFile('./pointlog.json'));
 } catch (error) {
-  pointData = {
-    allpoint: 0,
-    log: []
+  pointData = [["point","memo","date"]];
+  //
+  exec(`cd ${scriptPath+"/spreadsheet-auth-edit"}   && node update.js '${JSON.stringify(pointData)}'`, (err, stdout, stderr) => {
+  if (err) {
+    console.log(`stderr: ${stderr}`)
+    return
   }
+  console.log(`stdout: ${stdout}`)
+})
+
 }
 
 
@@ -150,10 +156,10 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
 }
 
 //起動確認のポスト 起動直後にこれすると接続確立されてないからリレーなしになっちゃうからちょっと遅らせてみる
-setTimeout(() => {
-  postEvent(7, ":monosimple:", [["e", "77cc687ee2a47078c914a5967518f45f29dba092104bb2e1859d4640ea04069e"], ["emoji", "monosimple", "https://i.imgur.com/n0Cqc5T.png"]])
-}
-  , 5 * 1000);
+// setTimeout(() => {
+//   postEvent(7, ":monosimple:", [["e", "77cc687ee2a47078c914a5967518f45f29dba092104bb2e1859d4640ea04069e"], ["emoji", "monosimple", "https://i.imgur.com/n0Cqc5T.png"]])
+// }
+//   , 5 * 1000);
 
 
 
@@ -283,8 +289,16 @@ const res_monoPoint = async (event, regex) => {
       const formattedDate = date.toISOString().replace(/T/, ' ').replace(/\..+/, ''); // ISOフォーマットを年月日時分秒に変換
 
       // 全体のポイントとログを作成
-      pointData.allpoint += point;
-      pointData.log.push({ point: point, comment: comment, date: formattedDate })
+      //pointData.allpoint += point;
+      const pushData=[point,comment,formattedDate];
+      exec(`cd ${scriptPath+"/spreadsheet-auth-edit"}  && node append.js '${JSON.stringify([pushData])}'`, (err, stdout, stderr) => {
+        if (err) {
+          console.log(`stderr: ${stderr}`)
+          return
+        }
+        console.log(`stdout: ${stdout}`)
+      })
+      pointData.push(pushData)
       await writeFile("./pointlog.json", JSON.stringify(pointData, null, 2));
 
       const tags = [["e", event.id], ["p", event.pubkey], ["k", event.kind.toString()]];
