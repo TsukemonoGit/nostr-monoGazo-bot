@@ -50,3 +50,9 @@ crontab -e
 git submodule update --remote
 ```
 でサブモジュールの最新を取り込む
+
+pointシステムはとりあえず
+
+https://docs.google.com/spreadsheets/d/1PBmE48GVk0_EOmPmoKqWTOD7vd3_7swbvSkiLylWWAM/edit#gid=0
+
+ここでみれるだけ（ローカルログやめた）

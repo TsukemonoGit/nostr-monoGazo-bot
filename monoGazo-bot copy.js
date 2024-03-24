@@ -18,41 +18,41 @@ const scriptPath = process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS_HEX.replace(/'/g, '"'));
 const point_user = process.env.POINTUSER_PUB_HEX;
 
-// /**
-//  * @typedef {Object} PointDataJson
-//  * @property {number} total - 合計ポイント数
-//  * @property {string[][]} data - ポイントデータ
-//  */
+/**
+ * @typedef {Object} PointDataJson
+ * @property {number} total - 合計ポイント数
+ * @property {string[][]} data - ポイントデータ
+ */
 
-// /**
-//  * @type {PointDataJson}
-//  */
-//let pointDataJson;
+/**
+ * @type {PointDataJson}
+ */
+let pointDataJson;
 
 /**
  *  @type {string[][]}
  */
 let pointData;
-// let totalPoint;
-// try {
 
-//   pointDataJson = await readFile('./pointlog.json');
-//   pointData = pointDataJson.data;
-//   //totalPoints = pointDataJson.total;
-//   //console.log(pointData, totalPoints);
-// } catch (error) {
-//   pointData = [["point", "memo", "date"]];
-//   pointDataJson = { "total": 0, "data": { pointData } };
-//   //
-//   exec(`cd ${scriptPath + "/spreadsheet-auth-edit"}   && node update.js '${JSON.stringify(pointData)}'`, (err, stdout, stderr) => {
-//     if (err) {
-//       console.log(`stderr: ${stderr}`)
-//       return
-//     }
-//     console.log(`stdout: ${stdout}`)
-//   })
-//   await writeFile("./pointlog.json", JSON.stringify(pointData, null, 2));
-// }
+try {
+
+  pointDataJson = JSON.parse(await readFile('./pointlog.json'));
+  pointData = pointDataJson.data;
+  //totalPoints = pointDataJson.total;
+  //console.log(pointData, totalPoints);
+} catch (error) {
+  pointData = [["point", "memo", "date"]];
+  pointDataJson = { "total": 0, "data": { pointData } };
+  //
+  exec(`cd ${scriptPath + "/spreadsheet-auth-edit"}   && node update.js '${JSON.stringify(pointData)}'`, (err, stdout, stderr) => {
+    if (err) {
+      console.log(`stderr: ${stderr}`)
+      return
+    }
+    console.log(`stdout: ${stdout}`)
+  })
+  await writeFile("./pointlog.json", JSON.stringify(pointData, null, 2));
+}
 
 
 const metadata = {
@@ -310,10 +310,10 @@ const res_monoPoint = async (event, regex) => {
       // 全体のポイントとログを作成
       const pushData = [point, comment, formattedDate];
 
-      // pointDataJson.data.push(pushData);
-      // pointDataJson.total += point;
+      pointDataJson.data.push(pushData);
+      pointDataJson.total += point;
 
-      //await writeFile("./pointlog.json", JSON.stringify(pointDataJson, null, 2));
+      await writeFile("./pointlog.json", JSON.stringify(pointDataJson, null, 2));
 
       //スプレッドシートに書き込む
       exec(`cd ${scriptPath + "/spreadsheet-auth-edit"}  && node append.js '${JSON.stringify([pushData])}'`, (err, stdout, stderr) => {
@@ -327,7 +327,7 @@ const res_monoPoint = async (event, regex) => {
 
       const tags = [["e", event.id], ["p", event.pubkey], ["k", event.kind.toString()]];
       //console.log(tags);
-      postEvent(7, "+", tags);
+      postEvent(7, pointDataJson.total.toString(), tags);
 
     } catch (error) {
       console.log(error);
