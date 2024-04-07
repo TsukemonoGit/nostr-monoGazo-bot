@@ -507,6 +507,21 @@ const res_monoGazo_delete = async (event, regex) => {
     }
   }
 }
+export const res_vs_random = async (event, regex) => {
+  const match = event.content.match(regex);
+  if (match === null) {
+    return;
+  }
+  if (match[1] !== undefined) {
+    const vsMatches = match[1].split("vs"); // vsで分割して配列に格納
+    console.log(vsMatches)
+    const randomIndex = Math.floor(Math.random() * vsMatches.length);
+    const message = vsMatches[randomIndex];
+    console.log(message)
+
+    postRepEvent(event, message, []);
+  }
+}
 //[RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => [string, string[][]] | null][]
 
 const resmapNormal = [
@@ -518,6 +533,7 @@ const resmapNormal = [
   [/(もの|mono)画像\s?どこ[?？]?/i, res_monoGazo_doko],
   [/(もの|mono)(画像)?サイト\s?どこ[?？]?/i, res_monoSite_doko],
   [/^(ポイント|ぽいんと|point|p)\s+([+-]?\d+)\s+(.*)/i, res_monoPoint],
+  [/^もの、(.+(?:vs.+)+)して$/, res_vs_random]
 ];
 //: [RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => Promise<[string, string[][]]> | [string, string[][]] | null][]
 const resmapReply = [
