@@ -520,8 +520,10 @@ export const res_vs_random = async (event, regex) => {
     const randomIndex = Math.floor(Math.random() * vsMatches.length);
     const message = vsMatches[randomIndex];
     console.log(message)
-
-    //postRepEvent(event, message, []);
+    //絵文字があるかもしれない。
+    const tags = event.tags.filter((item) => item[0] === "emoji");
+    console.log(tags)
+    postRepEvent(event, message, tags);
   }
 }
 //[RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => [string, string[][]] | null][]
