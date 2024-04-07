@@ -509,7 +509,7 @@ const res_monoGazo_delete = async (event, regex) => {
 }
 export const res_vs_random = async (event, regex) => {
   const match = event.content.match(regex);
-  if (match === null) {
+  if (match === null || match[0].length > 300) {
     return;
   }
   if (match[1] !== undefined) {
@@ -533,7 +533,7 @@ const resmapNormal = [
   [/(もの|mono)画像\s?どこ[?？]?/i, res_monoGazo_doko],
   [/(もの|mono)(画像)?サイト\s?どこ[?？]?/i, res_monoSite_doko],
   [/^(ポイント|ぽいんと|point|p)\s+([+-]?\d+)\s+(.*)/i, res_monoPoint],
-  [/^もの、(.+(?:vs.+)+)して$/, res_vs_random]
+  [/^もの、(.{1,50}(?:vs.{1,50})+)して$/, res_vs_random]
 ];
 //: [RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => Promise<[string, string[][]]> | [string, string[][]] | null][]
 const resmapReply = [
