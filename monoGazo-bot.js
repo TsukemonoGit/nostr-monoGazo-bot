@@ -513,13 +513,15 @@ export const res_vs_random = async (event, regex) => {
     return;
   }
   if (match[1] !== undefined) {
-    const vsMatches = match[1].split("vs"); // vsで分割して配列に格納
+    const vsMatches = match[1].split("vs").filter((value) => value.trim() !== ""); // vsで分割して配列に格納し、空の文字列をフィルタリング
+    // vsで分割して配列に格納
     console.log(vsMatches)
+    if (vsMatches.length <= 0) { return; }
     const randomIndex = Math.floor(Math.random() * vsMatches.length);
     const message = vsMatches[randomIndex];
     console.log(message)
 
-    postRepEvent(event, message, []);
+    //postRepEvent(event, message, []);
   }
 }
 //[RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => [string, string[][]] | null][]
