@@ -19,12 +19,17 @@ const App: Component = () => {
     }
     const onClickCopy = async (): Promise<void> => {
 
-        const data = {
+        const data = memo.value!==""?{
             url: url.value,
             author: author.value,
             date: date.value !== "" ? date.value : formatDate(),
             note: note.value,
             memo: memo.value
+        }:{
+            url: url.value,
+            author: author.value,
+            date: date.value !== "" ? date.value : formatDate(),
+            note: note.value
         }
 
         console.log(data.date);
