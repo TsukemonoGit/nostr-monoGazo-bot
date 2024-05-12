@@ -187,14 +187,14 @@ const subscription = observable.subscribe(async (packet) => {
   // Your minimal application!
   if (packet.event.pubkey === npub_hex) { return; }
   // console.log(packet);
-
+  const content = packet.event.content.trim();
 
   //誰へのリプでもない場合
   if (packet.event.tags.length === 0 || packet.event.tags.every(item => item[0] !== "p")) {
 
     // resmapNormal の中からマッチする正規表現の関数を実行
     for (const [regex, func] of resmapNormal) {
-      if (regex.test(packet.event.content)) {
+      if (regex.test(content)) {
         try {
           func(packet.event, regex); // マッチした場合に関数を実行
         } catch (error) {
@@ -208,7 +208,7 @@ const subscription = observable.subscribe(async (packet) => {
   else if (packet.event.tags.some(item => item[0] === "p" && item.includes(npub_hex))) {
     // resmapReply の中からマッチする正規表現の関数を実行
     for (const [regex, func] of resmapReply) {
-      if (regex.test(packet.event.content)) {
+      if (regex.test(content)) {
         try {
           func(packet.event, regex); // マッチした場合に関数を実行
         } catch (error) {
@@ -296,7 +296,7 @@ const res_monoPoint = async (event, regex) => {
 
     try {
       // 正規表現にマッチする部分を取得
-      const matches = event.content.match(regex);
+      const matches = event.content.trim().match(regex);
       // ポイントの値を取得
       const point = parseInt(matches[2]);
 
@@ -350,7 +350,7 @@ const res_wareki = (event, regex) => {
 const res_monoGazo = (event, regex) => {
 
   // 正規表現にマッチする部分を取得
-  const matches = event.content.match(regex);
+  const matches = event.content.trim().match(regex);
   if (matches === null) {
     throw new Error();
   }
@@ -410,7 +410,7 @@ const res_arufofo_agete = (event, regex) => {
 
 }
 const res_arufofo_douzo = (event, regex) => {
-  const match = event.content.match(regex);
+  const match = event.content.trim().match(regex);
   if (match === null) {
     throw new Error();
   }
@@ -448,7 +448,7 @@ const res_arufofo_douzo = (event, regex) => {
 const res_monoGazo_add = async (event, regex) => {
   //権限チェック
   if (owners.includes(event.pubkey)) {
-    const match = event.content.match(regex);
+    const match = event.content.trim().match(regex);
     if (match === null) {
       throw new Error();
     }
@@ -478,7 +478,7 @@ const res_monoGazo_add = async (event, regex) => {
 }
 const res_monoGazo_delete = async (event, regex) => {
   if (owners.includes(event.pubkey)) {
-    const match = event.content.match(regex);
+    const match = event.content.trim().match(regex);
     if (match === null) {
       throw new Error();
     }
@@ -508,7 +508,7 @@ const res_monoGazo_delete = async (event, regex) => {
   }
 }
 export const res_vs_random = async (event, regex) => {
-  const match = event.content.match(regex);
+  const match = event.content.trim().match(regex);
   if (match === null || match[0].length > 300) {
     return;
   }
