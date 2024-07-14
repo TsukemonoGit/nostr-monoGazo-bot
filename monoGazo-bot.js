@@ -7,7 +7,7 @@ env.config();
 
 import { exec } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
-
+import { verifier, seckeySigner } from 'rx-nostr-crypto';
 
 const monoGazoList = JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
 
@@ -67,8 +67,8 @@ const metadata = {
 }
 
 
-const rxNostr = createRxNostr({ websocketCtor: WebSocket });
-rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp", "wss://relay-jp.nostr.moctane.com"]);
+const rxNostr = createRxNostr({ verifier: verifier, websocketCtor: WebSocket, signer: seckeySigner(nsec) });
+rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp"]);
 
 const rxReq = createRxForwardReq();
 
@@ -76,7 +76,6 @@ const rxReq = createRxForwardReq();
 const observable = rxNostr.use(rxReq)
   .pipe(
     // Verify event hash and signature
-    verify(),
     // Uniq by event hash
     uniq(),
 
@@ -120,7 +119,7 @@ const postEvent = async (kind, content, tags, created_at) => {//}:EventData){
       tags: tags,
       pubkey: npub_hex,
       created_at: created_at
-    }, { seckey: nsec, relays: writeRelays() })
+    })//, { seckey: nsec, relays: writeRelays() }
       .subscribe({
         next: (packet) => {
           console.log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
@@ -159,8 +158,8 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
       content: content,
       tags: combinedTags,
       pubkey: npub_hex,
-      created_at: Math.max(event.created_at + 1, Math.floor(Date.now() / 1000))
-    }, { seckey: nsec, relays: writeRelays() }).subscribe({
+      created_at: Math.max(event.created_at + 1, Math.floor(Date.now() / 1000))//, { seckey: nsec, relays: writeRelays() }
+    }).subscribe({
       next: (packet) => {
         console.log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
       },
