@@ -21,11 +21,7 @@ const App: Component = () => {
           />{" "}
           monoGazo List
         </h1>
-        <span
-          class="makibishi"
-          data-url={rootUrl}
-          data-allow-anonymous-reaction="true"
-        ></span>
+        <span class="makibishi"></span>
         <p class={css({ paddingBottom: 2 })}>
           nostrの{" "}
           <a
