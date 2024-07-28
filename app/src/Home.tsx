@@ -20,8 +20,12 @@ const App: Component = () => {
             alt="₍ ･ᴗ･ ₎"
           />{" "}
           monoGazo List
+          <span
+            class={`makibishi ${css({ marginLeft: "6px" })}`}
+            data-url={rootUrl}
+          ></span>
         </h1>
-        <span class="makibishi"></span>
+
         <p class={css({ paddingBottom: 2 })}>
           nostrの{" "}
           <a
