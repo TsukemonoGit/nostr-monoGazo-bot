@@ -4,6 +4,7 @@ import jsonData from "./assets/data/imageList.json";
 import Rss from "./Rss";
 
 const App: Component = () => {
+  const rootUrl = window.location.origin + "/nostr-monoGazo-bot/";
   return (
     <div class={styles.appContainer}>
       <div class={styles.container}>
@@ -20,6 +21,11 @@ const App: Component = () => {
           />{" "}
           monoGazo List
         </h1>
+        <span
+          class="makibishi"
+          data-url={rootUrl}
+          data-allow-anonymous-reaction="true"
+        ></span>
         <p class={css({ paddingBottom: 2 })}>
           nostrの{" "}
           <a
