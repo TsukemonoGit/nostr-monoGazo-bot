@@ -223,6 +223,42 @@ const subscription = observable.subscribe(async (packet) => {
 rxReq.emit({ kinds: [1, 42], since: now });
 
 
+const weightRatio = 2; // 最後のインデックスが最初のインデックスの2倍の確率で選ばれるようにする
+const weightedRandomIndex = (length) => {
+  // // 指数関数的な分布に基づく重み付けを行う
+  // const maxWeight = Math.exp(length) - 1;
+  // const randomWeight = Math.random() * maxWeight;
+  // const weightedIndex = Math.log(randomWeight + 1);
+  // return Math.floor(weightedIndex);
+
+  // // インデックスの重みを線形に増加させる
+  // const weights = Array.from({ length }, (_, i) => i + 1);
+  // const totalWeight = weights.reduce((acc, weight) => acc + weight, 0);
+
+  // let randomWeight = Math.random() * totalWeight;
+
+  // for (let i = 0; i < weights.length; i++) {
+  //   randomWeight -= weights[i];
+  //   if (randomWeight <= 0) {
+  //     return i;
+  //   }
+  // }
+
+  // インデックスの重みを一定の比率で増加させる
+
+  const weights = Array.from({ length }, (_, i) => Math.pow(weightRatio, i / (length - 1)));
+  const totalWeight = weights.reduce((acc, weight) => acc + weight, 0);
+  const randomWeight = Math.random() * totalWeight;
+  const cumulativeWeights = weights.reduce((acc, weight) => {
+    const lastValue = acc.length > 0 ? acc[acc.length - 1] : 0;
+    acc.push(lastValue + weight);
+    return acc;
+  }, []);
+
+  return cumulativeWeights.findIndex(cumulativeWeight => randomWeight < cumulativeWeight);
+
+};
+
 
 async function gitPush(event) {
   // 日付を取得
@@ -258,7 +294,7 @@ const rep_monoGazo = (event, urlIndex) => {
 const res_arufofo_profile_change = (event, regex) => {
   console.log("あいこん変更");
 
-  const urlIndex = Math.floor(Math.random() * monoGazoList.length);
+  const urlIndex = weightedRandomIndex(monoGazoList.length);//Math.floor(Math.random() * monoGazoList.length);
   metadata.picture = monoGazoList[urlIndex].url;
 
   postEvent(0, JSON.stringify(metadata), []);
@@ -277,7 +313,7 @@ const res_naifofo = (event, regex) => {
 
 const res_monoGazo_random = (event, regex) => {
   console.log("もの画像");
-  const urlIndex = Math.floor(Math.random() * monoGazoList.length);
+  const urlIndex = weightedRandomIndex(monoGazoList.length);//Math.floor(Math.random() * monoGazoList.length);
   rep_monoGazo(event, urlIndex);
 }
 const res_monoGazo_doko = (event, regex) => {
@@ -366,7 +402,7 @@ const res_monoGazo = (event, regex) => {
   } else {
     //ランダム
     console.log("もの画像");
-    const urlIndex = Math.floor(Math.random() * monoGazoList.length);
+    const urlIndex = weightedRandomIndex(monoGazoList.length);//Math.floor(Math.random() * monoGazoList.length);
     rep_monoGazo(event, urlIndex);
 
   }
