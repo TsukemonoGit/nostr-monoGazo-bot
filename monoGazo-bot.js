@@ -397,13 +397,20 @@ const res_monoGazo = (event, regex) => {
   if (matches[2] !== undefined) {
     //指定された番号 微妙にフォーマットが違うので…
     console.log("もの画像", matches[2]);
-    const urlIndex = parseInt(matches[2]);
-    const tags = [
-      ["r", monoGazoList[urlIndex].url],
-      ["t", "もの画像"]
-    ];
+    //q 付けると元の投稿で引用リスト見た時に大量の投稿が表示されそうなのでqタグはあえて付けないよ
+    try {
+      const urlIndex = parseInt(matches[2]);
+      const tags = [
+        //["q", nip19.decode(monoGazoList[urlIndex].note).data],
+        ["r", monoGazoList[urlIndex].url],
+        ["t", "もの画像"],
 
-    postRepEvent(event, `#もの画像\n${monoGazoList[urlIndex].url}\n作: nostr:${monoGazoList[urlIndex].author} (${monoGazoList[urlIndex].date}) ${monoGazoList[urlIndex].memo ? " (" + monoGazoList[urlIndex].memo + ")" : ""} \nnostr:${monoGazoList[urlIndex].note}`, tags);
+      ];
+
+      postRepEvent(event, `#もの画像\n${monoGazoList[urlIndex].url}\n作: nostr:${monoGazoList[urlIndex].author} (${monoGazoList[urlIndex].date}) ${monoGazoList[urlIndex].memo ? " (" + monoGazoList[urlIndex].memo + ")" : ""} \nnostr:${monoGazoList[urlIndex].note}`, tags);
+    } catch (error) {
+      console.log("decode errorかな")
+    }
   } else {
     //ランダム
     console.log("もの画像");
