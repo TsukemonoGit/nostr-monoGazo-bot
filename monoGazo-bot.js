@@ -137,14 +137,19 @@ const postEvent = async (kind, content, tags, created_at) => {//}:EventData){
 const postRepEvent = async (event, content, tags) => {//}:EventData){
 
   const tag = [
-    ["p", event.pubkey],
-    ["e", event.id]];
+    ["p", event.pubkey]//,
+    // ["e", event.id]
+  ];
 
   const root = event.tags?.find((item) => item[item.length - 1] === "root");
   const warning = event.tags?.find((item) => item[0] === "content-warning");
-  // rootが見つかった場合、tagsにrootを追加
+  // rootが見つかった場合、tagsにrootを追加して、eをreplyとして追加
   if (root) {
     tag.push(root);
+    tag.push(["e", event.id, "", "reply"])
+  } else {
+    //rootがない場合eをrootとして追加
+    tag.push(["e", event.id, "", "root"])
   }
   if (warning) {
     tag.push(warning);
@@ -366,7 +371,7 @@ const res_monoPoint = async (event, regex) => {
 
     } catch (error) {
       console.log(error);
-      const tags = [["e", event.id], ["p", event.pubkey], ["k", event.kind.toString()]];
+      const tags = [["e", event.id], ["p", event.pubkey], ["k", event.kind.toString()]];//, ["k", event.kind.toString()]
       postEvent(7, "x", tags);
       //console.log(tags);
     }
@@ -459,12 +464,13 @@ const res_arufofo_douzo = (event, regex) => {
   //元投稿を引用につけてどうぞ先にリプライを送る
   const tags = [
     ["p", pubkey_reply_hex],
-    [
-      "e",
-      event.id,
-      "",
-      "mention"
-    ],
+    ["q", event.id],
+    // [
+    //   "e",
+    //   event.id,
+    //   "",
+    //   "mention"
+    // ],
     ["r", "https://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png"],
     ["t", "もの画像"]];
   const root = event.tags.find((item) => item[item.length - 1] === "root");
