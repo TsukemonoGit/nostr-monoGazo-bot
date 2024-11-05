@@ -574,6 +574,14 @@ export const res_vs_random = async (event, regex) => {
     postRepEvent(event, message, tags);
   }
 }
+
+export const res_randomNip = async (event, regex) => {
+  console.log("ランダムNIP");
+  const randomIndex = Math.floor(Math.random() * 100).toString().padStart(2, '0');// 00~99
+  const content = `NIP-${randomIndex}\nhttps://github.com/nostr-protocol/nips/blob/master/${randomIndex}.md`
+  postRepEvent(event, content, []);
+
+}
 //[RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => [string, string[][]] | null][]
 
 const resmapNormal = [
@@ -587,6 +595,7 @@ const resmapNormal = [
   [/^(ポイント|ぽいんと|point|p)\s+([+-]?\d+)\s+(.*)/i, res_monoPoint],
   [/^もの、(.{1,50}(?:vs.{1,50})+)して$/, res_vs_random],
   [/(もの|mono)画像\s?(\d+)$/i, res_monoGazo],
+  [/^もの、ランダムNIP(して)?$/i, res_randomNip],
 ];
 //: [RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => Promise<[string, string[][]]> | [string, string[][]] | null][]
 const resmapReply = [
