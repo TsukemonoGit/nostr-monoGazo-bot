@@ -63,5 +63,9 @@ export const commandList: Commands[] = [
     command: ["もの、〇〇vs△△vs...して"],
     rule: "",
     description: "〇〇,△△,...からランダムでリプライ",
+  },{
+    command: ["もの、ランダムNIP"],
+    rule: "",
+    description: "https://github.com/nostr-protocol/nips のURLをランダムで返す。存在しないNIPのことある",
   },
 ];
