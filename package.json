@@ -10,11 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "nostr-tools": "^2.7.1",
-    "nostr-typedef": "^0.9.0",
-    "rx-nostr": "^3.1.1",
-    "rx-nostr-crypto": "^3.0.3",
+    "dotenv": "^16.4.7",
+    "nostr-tools": "^2.10.4",
+    "nostr-typedef": "^0.11.0",
+    "rx-nostr": "^3.4.2",
+    "rx-nostr-crypto": "^3.1.3",
     "ws": "^8.18.0"
   }
 }
