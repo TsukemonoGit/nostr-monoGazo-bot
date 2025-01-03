@@ -9,7 +9,7 @@ import { exec } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import { verifier, seckeySigner } from 'rx-nostr-crypto';
 
-const monoGazoList = JSON.parse(await readFile('./imageList.json'));  //JSONで読み込む方
+
 
 const nsec = process.env.NSEC_HEX;
 const npub_hex = process.env.PUBHEX_HEX;
@@ -17,7 +17,7 @@ const accessToken = process.env.TOKEN;
 const scriptPath = process.env.SCRIPTPATH;
 const owners = JSON.parse(process.env.ORNERS_HEX.replace(/'/g, '"'));
 const point_user = process.env.POINTUSER_PUB_HEX;
-
+const monoGazoList = JSON.parse(await readFile(`${scriptPath}/imageList.json`));  //JSONで読み込む方
 // /**
 //  * @typedef {Object} PointDataJson
 //  * @property {number} total - 合計ポイント数
@@ -29,10 +29,10 @@ const point_user = process.env.POINTUSER_PUB_HEX;
 //  */
 //let pointDataJson;
 
-/**
- *  @type {string[][]}
- */
-let pointData;
+// /**
+//  *  @type {string[][]}
+//  */
+// let pointData;
 // let totalPoint;
 // try {
 
