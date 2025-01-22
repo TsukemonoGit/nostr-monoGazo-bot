@@ -15,6 +15,10 @@ const nsec = process.env.NSEC_HEX;
 const npub_hex = process.env.PUBHEX_HEX;
 const accessToken = process.env.TOKEN;
 const scriptPath = process.env.SCRIPTPATH;
+
+const GIT_AUTHOR_NAME = process.env.GIT_AUTHOR_NAME;
+const GIT_AUTHOR_EMAIL = process.env.GIT_AUTHOR_EMAIL;
+
 const owners = JSON.parse(process.env.ORNERS_HEX.replace(/'/g, '"'));
 const point_user = process.env.POINTUSER_PUB_HEX;
 const monoGazoList = JSON.parse(await readFile(`${scriptPath}/imageList.json`));  //JSONで読み込む方
@@ -272,17 +276,15 @@ async function gitPush(event) {
   // git コマンドを同期的に実行
   console.log(`cd ${scriptPath}`);
 
-  exec(`cd ${scriptPath}   && git remote set-url origin https://${accessToken}@github.com/TsukemonoGit/nostr-monoGazo-bot.git && sudo git pull origin main && git add . && git commit -m "Update imageList.json" && sudo git push -u origin main`, (err, stdout, stderr) => {
+  exec(`cd ${scriptPath} && git remote set-url origin https://${accessToken}@github.com/TsukemonoGit/nostr-monoGazo-bot.git &&  git pull origin main && git add . && git commit --author="${GIT_AUTHOR_NAME} <${GIT_AUTHOR_EMAIL}>" -m "Update imageList.json" && sudo git push -u origin main`, (err, stdout, stderr) => {
     if (err) {
-      console.log(`stderr: ${stderr}`)
-      //  postEvent(packet.event.kind, "₍ xᴗx ₎", tags);
-      postRepEvent(event, "₍ ･ᴗx ₎", [])
-      return
+      console.log(`stderr: ${stderr}`);
+      postRepEvent(event, "₍ ･ᴗx ₎", []);
+      return;
     }
-    console.log(`stdout: ${stdout}`)
-    // postEvent(packet.event.kind, "₍ ･ᴗ･ ₎", tags);
-    postRepEvent(event, "₍ ･ᴗ･ ₎", [])
-  })
+    console.log(`stdout: ${stdout}`);
+    postRepEvent(event, "₍ ･ᴗ･ ₎", []);
+  });
 }
 
 //
