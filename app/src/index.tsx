@@ -39,7 +39,7 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 
 render(
   () => (
-    <Router root={Layout}>
+    <Router root={Layout} base="/nostr-monoGazo-bot" >
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
