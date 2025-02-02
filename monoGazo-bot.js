@@ -276,7 +276,7 @@ async function gitPush(event) {
   // git コマンドを同期的に実行
   console.log(`cd ${scriptPath}`);
 
-  exec(`cd ${scriptPath} && git remote set-url origin https://${accessToken}@github.com/TsukemonoGit/nostr-monoGazo-bot.git &&  git pull origin main && git add . && git commit --author="${GIT_AUTHOR_NAME} <${GIT_AUTHOR_EMAIL}>" -m "Update imageList.json" &&  git push -u origin main`, (err, stdout, stderr) => {
+  exec(`cd ${scriptPath} && git remote set-url origin https://${accessToken}@github.com/TsukemonoGit/nostr-monoGazo-bot.git &&  git pull origin main && git add . &&git -c user.name='${GIT_AUTHOR_NAME}' -c user.email='${GIT_AUTHOR_EMAIL}' commit -m "Update imageList.json" &&  git push -u origin main`, (err, stdout, stderr) => {
     if (err) {
       console.log(`stderr: ${stderr}`);
       postRepEvent(event, "₍ ･ᴗx ₎", []);
