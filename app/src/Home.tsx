@@ -89,7 +89,7 @@ const App: Component = () => {
                       item().url.endsWith(".mp4") ||
                       item().url.endsWith(".avi")
                     }
-                    fallback={<img src={item().url} alt={`Image ${index}`} />}
+                    fallback={<img src={item().url} alt={`Image ${index}`} loading="lazy"/>}
                   >
                     <video controls width="200">
                       <source src={item().url} type="video/mp4" />
