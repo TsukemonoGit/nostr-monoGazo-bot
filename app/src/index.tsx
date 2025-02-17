@@ -7,7 +7,7 @@ import { css } from '../styled-system/css';
 import About from './About';
 import Contact from './Contact';
 import Home from './Home';
-
+import "@konemono/nostr-share-component"
 
 const root = document.getElementById('root');
 const Layout = (props: any) => {
@@ -24,7 +24,7 @@ const Layout = (props: any) => {
         <A href="/contact" class={css({ width: 'full', textAlign: 'center' })} onClick={scrollToTop}>ほか</A> {/* 👈 Add a link to the contact page */}
       </header>
       {props.children}
-      <footer>Footer</footer>
+      <footer class={css({ display: "flex", padding: "1em" })}><nostr-share >Nostrで共有</nostr-share></footer>
     </>
   );
 };
