@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { createRxNostr, createRxForwardReq, verify, uniq, now } from "rx-nostr";
+import { createRxNostr, createRxForwardReq, uniq, now } from "rx-nostr";
 import { delay, filter } from "rxjs";
 import { nip19 } from 'nostr-tools';
 import env from "dotenv";
@@ -73,7 +73,7 @@ const metadata = {
 
 
 const rxNostr = createRxNostr({ verifier: verifier, websocketCtor: WebSocket, signer: seckeySigner(nsec) });
-rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io", "wss://relay-jp.nostr.wirednet.jp"]);
+rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io"]);//, "wss://relay-jp.nostr.wirednet.jp"
 
 const rxReq = createRxForwardReq();
 
@@ -183,11 +183,6 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
 
 }
 
-//起動確認のポスト 起動直後にこれすると接続確立されてないからリレーなしになっちゃうからちょっと遅らせてみる
-// setTimeout(() => {
-//   postEvent(7, ":monosimple:", [["e", "77cc687ee2a47078c914a5967518f45f29dba092104bb2e1859d4640ea04069e"], ["emoji", "monosimple", "https://i.imgur.com/n0Cqc5T.png"]])
-// }
-//   , 5 * 1000);
 
 
 
@@ -235,24 +230,7 @@ rxReq.emit({ kinds: [1, 42], since: now });
 
 const weightRatio = 2; // 最後のインデックスが最初のインデックスの2倍の確率で選ばれるようにする
 const weightedRandomIndex = (length) => {
-  // // 指数関数的な分布に基づく重み付けを行う
-  // const maxWeight = Math.exp(length) - 1;
-  // const randomWeight = Math.random() * maxWeight;
-  // const weightedIndex = Math.log(randomWeight + 1);
-  // return Math.floor(weightedIndex);
 
-  // // インデックスの重みを線形に増加させる
-  // const weights = Array.from({ length }, (_, i) => i + 1);
-  // const totalWeight = weights.reduce((acc, weight) => acc + weight, 0);
-
-  // let randomWeight = Math.random() * totalWeight;
-
-  // for (let i = 0; i < weights.length; i++) {
-  //   randomWeight -= weights[i];
-  //   if (randomWeight <= 0) {
-  //     return i;
-  //   }
-  // }
 
   // インデックスの重みを一定の比率で増加させる
 
