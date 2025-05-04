@@ -309,9 +309,13 @@ async function gitPush(event, newData) {
     if (newData) {
       const tags = [
         ["r", newData.url],
-        ["t", "もの画像"]
+        ["t", "もの画像"], [
+          "emoji",
+          "don",
+          "https://images.kinoko.pw/drive/a7be2cb9-10fa-4459-baea-484237d0a667.webp"
+        ]
       ];
-      postEvent(1, `追加done\n#もの画像\n${newData.url}\n作: nostr:${newData.author} (${newData.date})`, tags);
+      postEvent(1, `追加:don:\n#もの画像\n${newData.url}\n作: nostr:${newData.author} (${newData.date})`, tags);
     }
 
   });
