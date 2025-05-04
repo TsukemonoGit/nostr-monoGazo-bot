@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
-import { createRxNostr, createRxForwardReq, uniq, now } from "rx-nostr";
-import { delay, filter } from "rxjs";
+import { createRxNostr, createRxForwardReq, uniq, now, createRxBackwardReq, completeOnTimeout } from "rx-nostr";
+import { delay, filter, pipe } from "rxjs";
 import { nip19 } from 'nostr-tools';
 import env from "dotenv";
 env.config();
@@ -22,6 +22,10 @@ const GIT_AUTHOR_EMAIL = process.env.GIT_AUTHOR_EMAIL;
 const owners = JSON.parse(process.env.ORNERS_HEX.replace(/'/g, '"'));
 const point_user = process.env.POINTUSER_PUB_HEX;
 const monoGazoList = JSON.parse(await readFile(`${scriptPath}/imageList.json`));  //JSONで読み込む方
+
+
+//addmonogazo
+const bookmarkTag = "monogazo";
 // /**
 //  * @typedef {Object} PointDataJson
 //  * @property {number} total - 合計ポイント数
@@ -188,6 +192,36 @@ const postRepEvent = async (event, content, tags) => {//}:EventData){
 
 // Start subscription
 const subscription = observable.subscribe(async (packet) => {
+
+  if (packet.event.kind === 30003) {
+    console.log(packet)
+    getMonogazoEvent(packet.event)  // ここをsomeEventからpacket.eventに変更
+      .then(receivedEvent => {
+        // イベント取得後の処理
+        console.log("イベント取得完了:", receivedEvent);
+
+        // 画像URLを取得する
+        const imageUrl = getUrl(receivedEvent.content);
+        // 日時を整形2025/05/04みたいになるようにして
+        const date = formatDate(receivedEvent.created_at);
+        // エンコード
+        const noteID = nip19.noteEncode(receivedEvent.id);
+        const author = nip19.npubEncode(receivedEvent.pubkey);
+
+        console.log(imageUrl, date, noteID, author); // author.atではなくauthorに修正
+
+
+        addMonogazoList({
+          url: imageUrl,
+          author: author, date: date, note: noteID
+        }, null)
+
+      })
+      .catch(error => {
+        console.error("処理エラー:", error);
+      });
+
+  }
   // Your minimal application!
   if (packet.event.pubkey === npub_hex) { return; }
   // console.log(packet);
@@ -225,7 +259,8 @@ const subscription = observable.subscribe(async (packet) => {
 });
 
 // Send REQ message to listen kind1 events
-rxReq.emit({ kinds: [1, 42], since: now });
+//もの画像に追加したいイベントが特定のブックマークフォルダに追加されたときに自動でもの画像に追加するための購読フィルターを追加
+rxReq.emit([{ kinds: [1, 42], since: now }, { kinds: [30003], authors: ["84b0c46ab699ac35eb2ca286470b85e081db2087cdef63932236c397417782f5"], "#d": [bookmarkTag] }]);
 
 
 const weightRatio = 2; // 最後のインデックスが最初のインデックスの2倍の確率で選ばれるようにする
@@ -247,7 +282,7 @@ const weightedRandomIndex = (length) => {
 
 };
 
-
+//event:Event|null
 async function gitPush(event) {
   // 日付を取得
   // const currentDate = new Date().toISOString().slice(0, 10);
@@ -258,11 +293,20 @@ async function gitPush(event) {
   exec(`cd ${scriptPath} && git remote set-url origin https://${accessToken}@github.com/TsukemonoGit/nostr-monoGazo-bot.git &&  git pull origin main && git add . &&git -c user.name='${GIT_AUTHOR_NAME}' -c user.email='${GIT_AUTHOR_EMAIL}' commit -m "Update imageList.json" &&  git push -u origin main`, (err, stdout, stderr) => {
     if (err) {
       console.log(`stderr: ${stderr}`);
-      postRepEvent(event, "₍ ･ᴗx ₎", []);
-      return;
+      if (event) {
+        postRepEvent(event, "₍ ･ᴗx ₎", []);
+      } else {
+        postEvent(1, "₍ ･ᴗx ₎", [])
+
+
+      } return;
     }
     console.log(`stdout: ${stdout}`);
-    postRepEvent(event, "₍ ･ᴗ･ ₎", []);
+    if (event) {
+      postRepEvent(event, "₍ ･ᴗ･ ₎", []);
+    } else {
+      postEvent(1, "₍ ･ᴗ･ ₎", [])
+    }
   });
 }
 
@@ -483,25 +527,42 @@ const res_monoGazo_add = async (event, regex) => {
     }
     if (match[3] !== undefined) {
       const newData = JSON.parse(match[3]);
-      if (newData.author.startsWith("nostr:")) {
-        newData.author = newData.author.substring(6);
+      addMonogazoList(newData, event);
+
+    }
+  }
+}
+
+async function addMonogazoList(newData, event) {
+  // すでに同じURLの画像が存在するかチェック
+  const isDuplicate = monoGazoList.some(item => item.url === newData.url);
+  if (isDuplicate) { return }
+
+  if (newData.author.startsWith("nostr:")) {
+    newData.author = newData.author.substring(6);
+  }
+  if (newData.note.startsWith("nostr:")) {
+    newData.note = newData.note.substring(6);
+  }
+  monoGazoList.push(newData);
+  try {
+    monoGazoList.sort((a, b) => new Date(a.date) - new Date(b.date));
+    await writeFile("./imageList.json", JSON.stringify(monoGazoList, null, 2));
+    try {
+      await gitPush(event);
+    } catch (error) {
+      console.log(error);
+      if (event) {
+        postRepEvent(event, "₍ ･ᴗx ₎", []);
+      } else {
+        postEvent(1, "₍ ･ᴗx ₎", [])
       }
-      if (newData.note.startsWith("nostr:")) {
-        newData.note = newData.note.substring(6);
-      }
-      monoGazoList.push(newData);
-      try {
-        monoGazoList.sort((a, b) => new Date(a.date) - new Date(b.date));
-        await writeFile("./imageList.json", JSON.stringify(monoGazoList, null, 2));
-        try {
-          await gitPush(event);
-        } catch (error) {
-          console.log(error);
-          postRepEvent(event, "₍ ･ᴗx ₎", []);
-        }
-      } catch (error) {
-        postRepEvent(event, "₍ xᴗx ₎", []);
-      }
+    }
+  } catch (error) {
+    if (event) {
+      postRepEvent(event, "₍ xᴗx ₎", []);
+    } else {
+      postEvent(1, "₍ xᴗx ₎", [])
     }
   }
 }
@@ -591,3 +652,82 @@ const resmapReply = [
   [/(削除|delete)\s*(\d+)*/i, res_monoGazo_delete],//許可されたユーザーかチェックして
 
 ];
+
+
+//-------------------------------
+
+function getMonogazoEvent(event) {
+  // タグの最後の要素をチェック
+  if (event.tags.find((tag) => tag[0] === "d")?.[1] !== bookmarkTag) {
+    return Promise.reject(new Error("対象外のタグです"));
+  }
+
+  const lastTag = event.tags.at(-1); // 最後の要素
+  if (lastTag[0] !== "e" || lastTag.length < 2) {
+    return Promise.reject(new Error("適切なeタグが見つかりません"));
+  }
+
+  const eventID = lastTag[1];
+
+  // イベント取得処理をPromiseで返す
+  return getEventById(eventID);
+}
+
+
+// rxNostrを使ったイベント取得をPromise化する関数
+function getEventById(eventId) {
+  return new Promise((resolve, reject) => {
+    const req = createRxBackwardReq();
+
+    let receivedEvent = null;
+
+    rxNostr.use(req).pipe(completeOnTimeout(2000)).subscribe({
+      next: (packet) => {
+        console.log("Received:", packet);
+        if (packet.event) {
+          receivedEvent = packet.event;
+        }
+      },
+      complete: () => {
+        console.log("Completed!");
+        if (receivedEvent) {
+          resolve(receivedEvent);
+        } else {
+          reject(new Error("イベントが見つかりませんでした"));
+        }
+      },
+      error: (err) => {
+        console.error("Error:", err);
+        if (receivedEvent) {
+          resolve(receivedEvent);
+        } else {
+          reject(new Error("イベントが見つかりませんでした"));
+        }
+      }
+    });
+
+    req.emit({ ids: [eventId], limit: 1 });
+    req.over();
+  });
+}
+
+// 画像URLを取得する関数
+function getUrl(content) {
+  // URLを抽出する正規表現パターン（https://で始まり、.webp|.png|.jpg|.jpeg|.gifで終わるもの）
+  const urlPattern = /(https?:\/\/[^\s]+\.(webp|png|jpe?g|gif))/i;
+  const match = content.match(urlPattern);
+
+  // 一致するものがあればそのURL、なければnullを返す
+  return match ? match[0] : null;
+}
+
+// 日付をYYYY/MM/DD形式にフォーマットする関数
+function formatDate(timestamp) {
+  const date = new Date(timestamp * 1000);
+  const year = date.getFullYear();
+  // 月と日を2桁にパディング（01, 02, ...）
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}/${month}/${day}`;
+}
