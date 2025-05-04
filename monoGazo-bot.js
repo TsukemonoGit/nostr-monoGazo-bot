@@ -283,7 +283,8 @@ const weightedRandomIndex = (length) => {
 };
 
 //event:Event|null
-async function gitPush(event) {
+//アド成功したときにkind1にポスと
+async function gitPush(event, newData) {
   // 日付を取得
   // const currentDate = new Date().toISOString().slice(0, 10);
 
@@ -304,9 +305,15 @@ async function gitPush(event) {
     console.log(`stdout: ${stdout}`);
     if (event) {
       postRepEvent(event, "₍ ･ᴗ･ ₎", []);
-    } else {
-      postEvent(1, "₍ ･ᴗ･ ₎", [])
     }
+    if (newData) {
+      const tags = [
+        ["r", newData.url],
+        ["t", "もの画像"]
+      ];
+      postEvent(1, `追加done\n#もの画像\n${newData.url}\n作: nostr:${newData.author} (${newData.date})`, tags);
+    }
+
   });
 }
 
@@ -549,7 +556,7 @@ async function addMonogazoList(newData, event) {
     monoGazoList.sort((a, b) => new Date(a.date) - new Date(b.date));
     await writeFile("./imageList.json", JSON.stringify(monoGazoList, null, 2));
     try {
-      await gitPush(event);
+      await gitPush(event, newData);
     } catch (error) {
       console.log(error);
       if (event) {
