@@ -724,12 +724,23 @@ function getEventById(eventId) {
 
 // 画像URLを取得する関数
 function getUrl(content) {
-  // URLを抽出する正規表現パターン（https://で始まり、.webp|.png|.jpg|.jpeg|.gifで終わるもの）
-  const urlPattern = /(https?:\/\/[^\s]+\.(webp|png|jpe?g|gif))/i;
-  const match = content.match(urlPattern);
+  // URLを抽出する正規表現パターン（http://またはhttps://で始まり、.webp|.png|.jpg|.jpeg|.gifで終わるもの）
+  const urlPattern = /(https?:\/\/[^\s]+\.(webp|png|jpe?g|gif))/gi; // gフラグを追加して全てのマッチを取得
 
-  // 一致するものがあればそのURL、なければnullを返す
-  return match ? match[0] : null;
+  // 全てのマッチを配列で取得
+  const matches = content.match(urlPattern);
+
+  // マッチがない場合はnull
+  if (!matches) return null;
+
+  // 複数の画像URLがある場合はnullを返す
+  if (matches.length > 1) {
+    console.log("複数の画像URLが見つかりました:", matches);
+    return null;
+  }
+
+  // 1つだけの場合はそのURLを返す
+  return matches[0];
 }
 
 // 日付をYYYY/MM/DD形式にフォーマットする関数
