@@ -2397,6 +2397,13 @@
     "url": "https://i.nostr.build/UavLp5nsSJ1mkrJL.jpg",
     "author": "npub1k0jrarx8um0lyw3nmysn50539ky4k8p7gfgzgrsvn8d7lccx3d0s38dczd",
     "date": "2025/05/05",
-    "note": "note1pqjnssupujnfz8wujm352m57axsf5xx2a007p7khes4yj2ef8u4q4ytrhd"
+    "note": "note1pqjnssupujnfz8wujm352m57axsf5xx2a007p7khes4yj2ef8u4q4ytrhd",
+    "memo": "nostr:note1dh0hkes3mgqfltmgg8assr96s945lex7gkqceclt3dw904u5asvq9uvety"
+  },
+  {
+    "url": "https://image.nostr.build/b8d403871c7c375b55b5f692d3b74389bb9d4e93ef71d68d7d729aa9a54d625b.jpg",
+    "author": "npub1uz5vh467hljwlwag5e0l2ja5xkzcgp8kms96ffj93gjd0ajz692qv3ucfc",
+    "date": "2025/05/05",
+    "note": "note137qgxp78l3ggwt3tvadlkqhny3s2p5trajtspxtnz7r4dpur8gpsvya92e"
   }
 ]
