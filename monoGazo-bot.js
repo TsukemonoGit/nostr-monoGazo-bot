@@ -888,6 +888,7 @@ function getMonogazoEvent(event) {
     return Promise.reject(new Error("適切なeタグが見つかりません"));
   }
 
+  const eventID = lastTag[1];
   // すでに同じIDの画像が存在するかチェック（参照先イベントIDで）
   const isDuplicate = monoGazoList.some(
     (item) => item.note === nip19.noteEncode(eventID)
@@ -895,8 +896,6 @@ function getMonogazoEvent(event) {
   if (isDuplicate) {
     return Promise.reject(new Error("既に追加済みのイベントです"));
   }
-
-  const eventID = lastTag[1];
 
   // イベント取得処理をPromiseで返す
   return getEventById(eventID);
