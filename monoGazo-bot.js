@@ -23,6 +23,7 @@ const scriptPath = process.env.SCRIPTPATH;
 
 const GIT_AUTHOR_NAME = process.env.GIT_AUTHOR_NAME;
 const GIT_AUTHOR_EMAIL = process.env.GIT_AUTHOR_EMAIL;
+const IMAGE_SELECTION_CHANNEL = process.env.IMAGE_SELECTION_CHANNEL;
 
 const owners = JSON.parse(process.env.ORNERS_HEX.replace(/'/g, '"'));
 const point_user = process.env.POINTUSER_PUB_HEX;
@@ -982,7 +983,11 @@ async function postImageSelectionRequest(
 
   content += `\n数字でリプライしてください（1-${imageUrls.length}）`;
 
-  const tags = [["t", "もの画像選択"], ...imageUrls.map((url) => ["r", url])];
+  const tags = [
+    ["e", IMAGE_SELECTION_CHANNEL, "", "root"],
+    ["t", "もの画像選択"],
+    ...imageUrls.map((url) => ["r", url]),
+  ];
 
   // この投稿のIDを取得するために一意なタイムスタンプを使用
   const timestamp = Math.floor(Date.now() / 1000);
@@ -1000,7 +1005,7 @@ async function postImageSelectionRequest(
     timestamp: Date.now(),
   });
 
-  postEvent(1, content, tags, timestamp);
+  postEvent(42, content, tags, timestamp);
   return selectionId;
 }
 
