@@ -944,7 +944,7 @@ function getEventById(eventId) {
 
 // 複数画像URLを取得する関数（新規追加）
 function getUrls(content) {
-  const urlPattern = /(https?:\/\/[^\s]+\.(webp|png|jpe?g|gif))/gi;
+  const urlPattern = /(https?:\/\/[^\s]+\.(webp|png|jpe?g|gif|svg))/gi;
   const matches = content.match(urlPattern);
   return matches || [];
 }
