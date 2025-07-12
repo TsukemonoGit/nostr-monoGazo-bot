@@ -131,7 +131,6 @@ const App: Component = () => {
                           </svg>
                         </a>
                       </p>
-                      <nostr-note display="name" id={item().note} />
                       <p class={styles.authorLine}>
                         Author:
                         <nostr-profile display="name" id={item().author} />
