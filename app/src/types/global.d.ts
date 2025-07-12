@@ -11,6 +11,10 @@ declare global {
         id?: string;
         display?: string;
       };
+      "nostr-list": {
+        id?: string;
+        display?: string;
+      };
     }
   }
 }

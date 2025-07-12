@@ -2,6 +2,7 @@ import { css } from "../styled-system/css";
 import { createSignal, Index, onMount, Show, type Component } from "solid-js";
 import jsonData from "./assets/data/imageList.json";
 import Rss from "./Rss";
+import MonoGazoPosts from "./MonoGazoPosts";
 /* import "@konemono/nostr-web-components";
 import "@konemono/nostr-web-components/style.css"; */
 
@@ -163,7 +164,8 @@ const App: Component = () => {
           </Show>
         </Show>
       </div>
-      <Rss />
+      {/*   <Rss /> */}
+      <MonoGazoPosts />
     </div>
   );
 };
