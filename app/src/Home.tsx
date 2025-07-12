@@ -4,6 +4,7 @@ import jsonData from "./assets/data/imageList.json";
 import Rss from "./Rss";
 import "@konemono/nostr-web-components";
 import "@konemono/nostr-web-components/style.css";
+
 const App: Component = () => {
   const rootUrl = window.location.origin + "/nostr-monoGazo-bot/";
   return (
