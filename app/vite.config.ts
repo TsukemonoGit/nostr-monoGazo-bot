@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite';
-import solidPlugin from 'vite-plugin-solid';
+import { defineConfig } from "vite";
+import solidPlugin from "vite-plugin-solid";
 
 export default defineConfig(({ command }) => ({
   plugins: [solidPlugin()],
@@ -7,8 +7,13 @@ export default defineConfig(({ command }) => ({
     port: 3000,
   },
   build: {
-    target: 'esnext',
-    outDir: './docs',
+    target: "esnext",
+    outDir: "./docs",
   },
   base: command === "serve" ? "/" : "/nostr-monoGazo-bot/",
+
+  // 🔽 ここを追加
+  optimizeDeps: {
+    include: ["@konemono/nostr-web-components"],
+  },
 }));
