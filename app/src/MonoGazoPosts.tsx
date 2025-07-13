@@ -1,8 +1,9 @@
 import { css } from "../styled-system/css";
 import { createSignal, type Component, onMount, Show } from "solid-js";
-
+import("@konemono/nostr-web-components");
+import("@konemono/nostr-web-components/style.css");
 const MonoGazoPosts: Component = () => {
-  const [nostrReady, setNostrReady] = createSignal(false);
+  /*  const [nostrReady, setNostrReady] = createSignal(false);
 
   onMount(async () => {
     try {
@@ -16,17 +17,17 @@ const MonoGazoPosts: Component = () => {
     } catch (error) {
       console.error("Failed to load nostr components:", error);
     }
-  });
+  }); */
   return (
     <div class={styless.rss}>
       <h2 class={styless.rssTitle}>Nostr もの画像 Posts</h2>
       <div class={styless.rssContainer}>
-        <Show when={nostrReady()}>
-          <nostr-list
-            filters='[{"kinds":[1],"limit":50 ,"authors":["f987fb90696fcb09358629aeebf5156ea05a405101c4f2d9020bf02f47ea4a49"]}]'
-            limit="20"
-          ></nostr-list>
-        </Show>
+        {/*    <Show when={nostrReady()}> */}
+        <nostr-list
+          filters='[{"kinds":[1],"limit":50 ,"authors":["f987fb90696fcb09358629aeebf5156ea05a405101c4f2d9020bf02f47ea4a49"]}]'
+          limit="20"
+        ></nostr-list>
+        {/*   </Show> */}
       </div>
     </div>
   );

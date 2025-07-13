@@ -3,11 +3,11 @@ import { createSignal, Index, onMount, Show, type Component } from "solid-js";
 import jsonData from "./assets/data/imageList.json";
 import Rss from "./Rss";
 import MonoGazoPosts from "./MonoGazoPosts";
-/* import "@konemono/nostr-web-components";
-import "@konemono/nostr-web-components/style.css"; */
+import "@konemono/nostr-web-components";
+import "@konemono/nostr-web-components/style.css";
 
 const App: Component = () => {
-  const [nostrReady, setNostrReady] = createSignal(false);
+  /*   const [nostrReady, setNostrReady] = createSignal(false);
 
   onMount(async () => {
     try {
@@ -21,7 +21,7 @@ const App: Component = () => {
     } catch (error) {
       console.error("Failed to load nostr components:", error);
     }
-  });
+  }); */
 
   const rootUrl = window.location.origin + "/nostr-monoGazo-bot/";
   return (
@@ -98,70 +98,69 @@ const App: Component = () => {
           when={jsonData && jsonData.length > 0}
           fallback={<p class={styles.noData}>No data available.</p>}
         >
-          {" "}
-          <Show when={nostrReady()}>
-            <nostr-container relays='["wss://nos.lol","wss://yabu.me"]'>
-              <div class={styles.imageList}>
-                <Index each={jsonData}>
-                  {(item, index) => (
-                    <div class={styles.imageItem}>
-                      <Show
-                        when={
-                          item().url.endsWith(".mov") ||
-                          item().url.endsWith(".mp4") ||
-                          item().url.endsWith(".avi")
-                        }
-                        fallback={
-                          <img
-                            src={item().url}
-                            alt={`Image ${index}`}
-                            loading="lazy"
-                          />
-                        }
-                      >
-                        <video controls width="200">
-                          <source src={item().url} type="video/mp4" />
-                          Your browser does not support the video tag.
-                        </video>
-                      </Show>
+          {/* <Show when={nostrReady()}> */}
+          <nostr-container relays='["wss://nos.lol","wss://yabu.me"]'>
+            <div class={styles.imageList}>
+              <Index each={jsonData}>
+                {(item, index) => (
+                  <div class={styles.imageItem}>
+                    <Show
+                      when={
+                        item().url.endsWith(".mov") ||
+                        item().url.endsWith(".mp4") ||
+                        item().url.endsWith(".avi")
+                      }
+                      fallback={
+                        <img
+                          src={item().url}
+                          alt={`Image ${index}`}
+                          loading="lazy"
+                        />
+                      }
+                    >
+                      <video controls width="200">
+                        <source src={item().url} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    </Show>
 
-                      <div class={styles.imageInfo}>
-                        <p class={styles.infoLine}>
-                          <span>
-                            <b>No.{index}</b> {item().date}
-                          </span>
-                          <a
-                            aria-label="open in nostter"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            href={`https://njump.me/${item().note}`}
-                            class={styles.link}
+                    <div class={styles.imageInfo}>
+                      <p class={styles.infoLine}>
+                        <span>
+                          <b>No.{index}</b> {item().date}
+                        </span>
+                        <a
+                          aria-label="open in nostter"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href={`https://njump.me/${item().note}`}
+                          class={styles.link}
+                        >
+                          <svg
+                            class={styles.linkIcon}
+                            xmlns="http://www.w3.org/2000/svg"
+                            height="16"
+                            viewBox="0 -960 960 960"
+                            width="16"
                           >
-                            <svg
-                              class={styles.linkIcon}
-                              xmlns="http://www.w3.org/2000/svg"
-                              height="16"
-                              viewBox="0 -960 960 960"
-                              width="16"
-                            >
-                              <path
-                                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"
-                                fill="#0000FF"
-                              />
-                            </svg>
-                          </a>
-                        </p>
-                        <p class={styles.authorLine}>
-                          Author:
-                          <nostr-profile display="name" id={item().author} />
-                        </p>
-                      </div>
+                            <path
+                              d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"
+                              fill="#0000FF"
+                            />
+                          </svg>
+                        </a>
+                      </p>
+                      <p class={styles.authorLine}>
+                        Author:
+                        <nostr-profile display="name" id={item().author} />
+                      </p>
                     </div>
-                  )}
-                </Index>
-              </div>
-            </nostr-container>{" "}
-          </Show>
+                  </div>
+                )}
+              </Index>
+            </div>
+          </nostr-container>
+          {/*   </Show> */}
         </Show>
       </div>
       {/*   <Rss /> */}
