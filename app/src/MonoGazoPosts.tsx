@@ -1,7 +1,7 @@
 import { css } from "../styled-system/css";
 import { createSignal, type Component, onMount, Show } from "solid-js";
-import("@konemono/nostr-web-components");
-import("@konemono/nostr-web-components/style.css");
+import "@konemono/nostr-web-components";
+import "@konemono/nostr-web-components/style.css";
 const MonoGazoPosts: Component = () => {
   /*  const [nostrReady, setNostrReady] = createSignal(false);
 

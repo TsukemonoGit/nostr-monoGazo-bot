@@ -7,7 +7,7 @@ import "@konemono/nostr-web-components";
 import "@konemono/nostr-web-components/style.css";
 
 const App: Component = () => {
-  /*   const [nostrReady, setNostrReady] = createSignal(false);
+  /*const [nostrReady, setNostrReady] = createSignal(false);
 
   onMount(async () => {
     try {
@@ -21,8 +21,8 @@ const App: Component = () => {
     } catch (error) {
       console.error("Failed to load nostr components:", error);
     }
-  }); */
-
+  });
+*/
   const rootUrl = window.location.origin + "/nostr-monoGazo-bot/";
   return (
     <div class={styles.appContainer}>
@@ -98,7 +98,8 @@ const App: Component = () => {
           when={jsonData && jsonData.length > 0}
           fallback={<p class={styles.noData}>No data available.</p>}
         >
-          {/* <Show when={nostrReady()}> */}
+          {" "}
+          {/*   <Show when={nostrReady()}> */}
           <nostr-container relays='["wss://nos.lol","wss://yabu.me"]'>
             <div class={styles.imageList}>
               <Index each={jsonData}>
@@ -159,8 +160,8 @@ const App: Component = () => {
                 )}
               </Index>
             </div>
-          </nostr-container>
-          {/*   </Show> */}
+          </nostr-container>{" "}
+          {/*    </Show> */}
         </Show>
       </div>
       {/*   <Rss /> */}
