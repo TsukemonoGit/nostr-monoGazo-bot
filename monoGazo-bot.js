@@ -78,8 +78,9 @@ const metadata = {
   about:
     "ものが集めた画像\nmono画像\nあるんふぉふぉ\nこれ入れてとか\n入れないでとかあったら\nどうにかこうにかお伝え下さい",
   nip05: "mono_gazo@tsukemonoGit.github.io",
-  lud16: "tsukemono@getalby.com",
-  birth: [4, 8, 2023],
+  lud16: "thatthumb37@walletofsatoshi.com",
+  bot: true,
+  birthday: { year: 2023, month: 8, day: 4 },
 };
 
 const rxNostr = createRxNostr({
