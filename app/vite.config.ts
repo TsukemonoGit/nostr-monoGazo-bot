@@ -13,7 +13,7 @@ export default defineConfig(({ command }) => ({
   base: command === "serve" ? "/" : "/nostr-monoGazo-bot/",
 
   // 🔽 ここを追加
-  optimizeDeps: {
+  /* optimizeDeps: {
     include: ["@konemono/nostr-web-components"],
-  },
+  }, */
 }));

@@ -11,11 +11,11 @@ const App: Component = () => {
 
   onMount(async () => {
     try {
-      await import("@konemono/nostr-web-components");
+      /*      await import("@konemono/nostr-web-components");
       await import("@konemono/nostr-web-components/style.css");
 
       await customElements.whenDefined("nostr-container");
-      await customElements.whenDefined("nostr-profile");
+      await customElements.whenDefined("nostr-profile"); */
 
       setNostrReady(true);
     } catch (error) {
@@ -100,7 +100,7 @@ const App: Component = () => {
         >
           {" "}
           <Show when={nostrReady()}>
-            <nostr-container relays='["wss://nos.lol","wss://yabu.me"]'>
+            <nostr-container relays='["wss://nos.lol","wss://yabu.me","wss://wot.nostr.net"]'>
               <div class={styles.imageList}>
                 <Index each={jsonData}>
                   {(item, index) => (
@@ -153,14 +153,14 @@ const App: Component = () => {
                         </p>
                         <p class={styles.authorLine}>
                           Author:
-                          <nostr-profile display="name" id={item().author} />
+                          <nostr-profile display="name" user={item().author} />
                         </p>
                       </div>
                     </div>
                   )}
                 </Index>
               </div>
-            </nostr-container>{" "}
+            </nostr-container>
           </Show>
         </Show>
       </div>

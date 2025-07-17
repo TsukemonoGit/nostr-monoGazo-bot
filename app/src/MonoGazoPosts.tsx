@@ -6,12 +6,12 @@ const MonoGazoPosts: Component = () => {
 
   onMount(async () => {
     try {
-      await import("@konemono/nostr-web-components");
+      /*  await import("@konemono/nostr-web-components");
       await import("@konemono/nostr-web-components/style.css");
 
       await customElements.whenDefined("nostr-container");
       await customElements.whenDefined("nostr-profile");
-      await customElements.whenDefined("nostr-list");
+      await customElements.whenDefined("nostr-list"); */
       setNostrReady(true);
     } catch (error) {
       console.error("Failed to load nostr components:", error);
