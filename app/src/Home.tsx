@@ -69,7 +69,7 @@ const App: Component = () => {
           fallback={<p class={styles.noData}>No data available.</p>}
         >
           <Show when={nostrReady()}>
-            <nostr-container relays='["wss://nos.lol","wss://yabu.me","wss://wot.nostr.net"]'>
+            <nostr-container relays='["wss://nos.lol","wss://yabu.me","wss://nostr.compile-error.net"]'>
               <div class={styles.imageList}>
                 <Index each={jsonData}>
                   {(item, index) => (
