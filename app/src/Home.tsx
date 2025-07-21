@@ -1,8 +1,9 @@
 import { css } from "../styled-system/css";
 import { createSignal, Index, onMount, Show, type Component } from "solid-js";
 import jsonData from "./assets/data/imageList.json";
-import Rss from "./Rss";
+//import Rss from "./Rss";
 import MonoGazoPosts from "./MonoGazoPosts";
+import { A } from "@solidjs/router";
 /* import "@konemono/nostr-web-components";
 import "@konemono/nostr-web-components/style.css"; */
 
@@ -46,51 +47,20 @@ const App: Component = () => {
         </h1>
 
         <p class={css({ paddingBottom: 2 })}>
-          nostrの{" "}
-          <a
-            class={css({ textDecoration: "underline" })}
-            target="_blank"
-            rel="noopener noreferrer"
-            href={`https://nostter.app/npub1lxrlhyrfdl9sjdvx9xhwhag4d6s95sz3q8z09kgzp0cz73l2ffys9p726u`}
-          >
-            もの画像BOT
-            <svg
-              class={styles.linkIcon}
-              xmlns="http://www.w3.org/2000/svg"
-              height="16"
-              viewBox="0 -960 960 960"
-              width="16"
-            >
-              <path
-                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"
-                fill="#0000FF"
-              />
-            </svg>
-          </a>
+          nostrの
+          <span class={css({ display: "inline-flex", padding: "0 4px " })}>
+            <nostr-profile
+              display="name"
+              user="npub1lxrlhyrfdl9sjdvx9xhwhag4d6s95sz3q8z09kgzp0cz73l2ffys9p726u"
+            ></nostr-profile>
+          </span>
           が集めた画像たち
         </p>
 
         <p class={css({ paddingBottom: 2 })}>
-          <a
-            class={css({ textDecoration: "underline" })}
-            target="_blank"
-            rel="noopener noreferrer"
-            href={`https://nostviewstr.vercel.app/naddr1qqyx6mmwdakk76nfqgsgfvxyd2mfntp4avk29pj8pwz7pqwmyzrummmrjv3rdsuhg9mc9agrqsqqqafnn3n5r5`}
-          >
+          <A href="/moji" class={css({ textDecoration: "underline" })}>
             ものもじリスト
-            <svg
-              class={styles.linkIcon}
-              xmlns="http://www.w3.org/2000/svg"
-              height="16"
-              viewBox="0 -960 960 960"
-              width="16"
-            >
-              <path
-                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"
-                fill="#0000FF"
-              />
-            </svg>
-          </a>
+          </A>
           もあるよ
         </p>
 
@@ -98,7 +68,6 @@ const App: Component = () => {
           when={jsonData && jsonData.length > 0}
           fallback={<p class={styles.noData}>No data available.</p>}
         >
-          {" "}
           <Show when={nostrReady()}>
             <nostr-container relays='["wss://nos.lol","wss://yabu.me","wss://wot.nostr.net"]'>
               <div class={styles.imageList}>
@@ -182,9 +151,9 @@ const styles = {
 
   container: css({
     padding: "20px",
-    maxWidth: "1000px",
+    maxWidth: "1100px",
     margin: "0 auto",
-    "@media (min-width: 800px) and (max-width: 1600px)": {
+    "@media (min-width: 1000px) and (max-width: 1600px)": {
       marginRight: "18em",
     },
   }),
