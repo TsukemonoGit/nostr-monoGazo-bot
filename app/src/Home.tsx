@@ -153,7 +153,7 @@ const styles = {
     padding: "20px",
     maxWidth: "1100px",
     margin: "0 auto",
-    "@media (min-width: 1000px) and (max-width: 1600px)": {
+    "@media (min-width: 800px) and (max-width: 1600px)": {
       marginRight: "18em",
     },
   }),
