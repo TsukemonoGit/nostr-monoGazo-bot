@@ -2,7 +2,7 @@
 import { render } from "solid-js/web";
 
 import "./index.css";
-import { A, Route, Router } from "@solidjs/router";
+import { A, Route, HashRouter } from "@solidjs/router";
 import { css } from "../styled-system/css";
 import About from "./About";
 import Contact from "./Contact";
@@ -68,12 +68,12 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 
 render(
   () => (
-    <Router root={Layout} base="/nostr-monoGazo-bot">
+    <HashRouter root={Layout}>
       <Route path="/" component={Home} />
       <Route path="/moji" component={MojiList} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
-    </Router>
+    </HashRouter>
   ),
   root!
 );
