@@ -654,15 +654,20 @@ async function addMonogazoList(newData, event) {
   // 同じURLが存在する場合は追加せず終了
   const isDuplicate = monoGazoList.some((item) => item.url === newData.url);
   if (isDuplicate) return;
-
-  // "nostr:"プレフィックスを削除
-  if (newData.author?.startsWith("nostr:"))
-    newData.author = newData.author.substring(6);
-  if (newData.note?.startsWith("nostr:"))
-    newData.note = newData.note.substring(6);
+  //@type Item
+  const saveData = {
+    id: newData.id,
+    url: newData.url,
+    date: newData.data,
+    memo: newData.memo,
+    nostr: {
+      author: newData.author,
+      post_id: newData.note,
+    },
+  };
 
   // monoGazoListに追加
-  monoGazoList.push(newData);
+  monoGazoList.push(saveData);
 
   try {
     // 日付順にソート
@@ -809,10 +814,8 @@ const res_image_selection = async (event, regex) => {
       {
         url: selectedUrl,
         author: author,
-        nostr: {
-          date: date,
-          post_id: noteID,
-        },
+        date: date,
+        note: noteID,
       },
       event
     );
