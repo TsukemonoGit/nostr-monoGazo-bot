@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app          # atp/ディレクトリを/appにマウント
+      - ..:/app/data    # monoGazo/ディレクトリを/app/dataにマウント
+    env_file:
+      - .env
