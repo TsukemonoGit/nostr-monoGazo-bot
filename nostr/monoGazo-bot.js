@@ -809,8 +809,10 @@ const res_image_selection = async (event, regex) => {
       {
         url: selectedUrl,
         author: author,
-        date: date,
-        note: noteID,
+        nostr: {
+          date: date,
+          post_id: noteID,
+        },
       },
       event
     );
