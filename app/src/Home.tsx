@@ -1,11 +1,14 @@
 import { css } from "../styled-system/css";
 import { createSignal, Index, onMount, Show, type Component } from "solid-js";
-import jsonData from "./assets/data/imageList.json";
+import json from "./assets/data/imageList.json";
+
 //import Rss from "./Rss";
 import MonoGazoPosts from "./MonoGazoPosts";
 import { A } from "@solidjs/router";
+import { JsonData } from "./types/types";
 /* import "@konemono/nostr-web-components";
 import "@konemono/nostr-web-components/style.css"; */
+const jsonData = json as JsonData;
 
 const App: Component = () => {
   const [nostrReady, setNostrReady] = createSignal(false);
@@ -81,12 +84,11 @@ const App: Component = () => {
                       url.endsWith(".avi");
 
                     // サービスに応じてリンク切り替え
-                    const linkHref =
-                      item().service === "nostr"
-                        ? `https://njump.me/${item().note}`
-                        : item().service === "atp"
-                          ? `https://bsky.app/profile/${item().author}/post/${item().id}`
-                          : "#";
+                    const linkHref = item().nostr
+                      ? `https://njump.me/${item().nostr!.post_id}`
+                      : item().atp
+                        ? `https://bsky.app/profile/${item().atp!.author}/post/${item().atp!.id}`
+                        : "#";
 
                     return (
                       <div class={styles.imageItem} id={item().id}>
@@ -134,10 +136,23 @@ const App: Component = () => {
                           </p>
                           <p class={styles.authorLine}>
                             Author:{" "}
-                            <nostr-profile
-                              display="name"
-                              user={item().author}
-                            />
+                            <Show
+                              when={item().nostr}
+                              fallback={
+                                <A
+                                  href={`https://bsky.app/profile/${item().atp!.author}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {item().atp!.author}
+                                </A>
+                              }
+                            >
+                              <nostr-profile
+                                display="name"
+                                user={item().nostr!.author}
+                              />
+                            </Show>
                           </p>
                         </div>
                       </div>
