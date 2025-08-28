@@ -2,7 +2,7 @@ name: Build and Deploy static content to Pages
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -11,7 +11,7 @@ permissions:
   pages: write
 
 concurrency:
-  group: 'pages'
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
@@ -24,42 +24,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: 'npm'
-          path: './app/'
+          node-version: 20
+          cache: "npm"
+          path: "./app/"
       - name: Install dependencies
         run: npm install
         working-directory: ./app
       - name: Copy imageList.json
         run: cp imageList.json ./app/src/assets/data/imageList.json
-      
 
-      
       - uses: snow-actions/git-config-user@v1.0.0
         with:
-          name:  ${{secrets.USER_NAME}}
+          name: ${{secrets.USER_NAME}}
           email: ${{secrets.USER_EMAIL}}
       - run: |
           set -x
           git add .
           git commit -m 'Update imageList.json' || true # エラーが出ても続行
           git push || true # エラーが出ても続行
-     
-    
 
       - name: Build
         run: npm run build
         working-directory: ./app
       - name: Setup Pages
         uses: actions/configure-pages@v5
-   
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './app/docs'
+          path: "./app/docs"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-      
