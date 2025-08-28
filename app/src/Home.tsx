@@ -73,25 +73,35 @@ const App: Component = () => {
               <div class={styles.imageList}>
                 <Index each={jsonData.slice().reverse()}>
                   {(item, index) => {
-                    const reversedIndex = () => jsonData.length - 1 - index;
+                    const reversedIndex = jsonData.length - 1 - index;
+                    const url = item().url;
+                    const isVideo =
+                      url.endsWith(".mov") ||
+                      url.endsWith(".mp4") ||
+                      url.endsWith(".avi");
+
+                    // サービスに応じてリンク切り替え
+                    const linkHref =
+                      item().service === "nostr"
+                        ? `https://njump.me/${item().note}`
+                        : item().service === "atp"
+                          ? `https://bsky.app/profile/${item().author}/post/${item().id}`
+                          : "#";
+
                     return (
-                      <div class={styles.imageItem}>
+                      <div class={styles.imageItem} id={item().id}>
                         <Show
-                          when={
-                            item().url.endsWith(".mov") ||
-                            item().url.endsWith(".mp4") ||
-                            item().url.endsWith(".avi")
-                          }
+                          when={isVideo}
                           fallback={
                             <img
-                              src={item().url}
+                              src={url}
                               alt={`Image ${reversedIndex}`}
                               loading="lazy"
                             />
                           }
                         >
                           <video controls width="200">
-                            <source src={item().url} type="video/mp4" />
+                            <source src={url} type="video/mp4" />
                             Your browser does not support the video tag.
                           </video>
                         </Show>
@@ -102,10 +112,10 @@ const App: Component = () => {
                               <b>No.{reversedIndex}</b> {item().date}
                             </span>
                             <a
-                              aria-label="open in nostter"
+                              aria-label="open in service"
                               target="_blank"
                               rel="noopener noreferrer"
-                              href={`https://njump.me/${item().note}`}
+                              href={linkHref}
                               class={styles.link}
                             >
                               <svg
@@ -123,7 +133,7 @@ const App: Component = () => {
                             </a>
                           </p>
                           <p class={styles.authorLine}>
-                            Author:
+                            Author:{" "}
                             <nostr-profile
                               display="name"
                               user={item().author}
