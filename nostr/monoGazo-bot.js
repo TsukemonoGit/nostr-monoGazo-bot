@@ -658,11 +658,11 @@ async function addMonogazoList(newData, event) {
   const saveData = {
     id: newData.id,
     url: newData.url,
-    date: newData.data,
+    date: newData.date,
     memo: newData.memo,
     nostr: {
-      author: newData.author,
-      post_id: newData.note,
+      author: newData.author.replace("nostr:", ""),
+      post_id: newData.note.replace("nostr:", ""),
     },
   };
 
