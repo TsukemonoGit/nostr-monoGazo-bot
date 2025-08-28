@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
-          working-directory: ./app
+          cache-dependency-path: ./app/package-lock.json # ★ 追加
       - name: Install dependencies
         run: npm install
         working-directory: ./app
