@@ -696,35 +696,50 @@ async function addMonogazoList(newData, event) {
 }
 
 const res_monoGazo_delete = async (event, regex) => {
-  if (owners.includes(event.pubkey)) {
-    const match = event.content.trim().match(regex);
-    if (match === null) {
-      throw new Error();
-    }
-    if (match[2] !== undefined) {
-      const numericValue = parseInt(match[2]);
+  const match = event.content.trim().match(regex);
+  if (match === null) {
+    throw new Error();
+  }
 
-      if (!isNaN(numericValue) && numericValue < monoGazoList.length) {
-        const deleteUrl = monoGazoList[numericValue];
-        const message = JSON.stringify(deleteUrl, null, 2) + "\nを削除します";
-        postRepEvent(event, message, []);
-        monoGazoList.splice(numericValue, 1);
-        try {
-          monoGazoList.sort((a, b) => new Date(a.date) - new Date(b.date));
-          await writeFile(
-            `${scriptPath}/imageList.json`,
-            JSON.stringify(monoGazoList, null, 2)
-          );
-          try {
-            await gitPush(event);
-          } catch (error) {
-            console.log(error);
-            postRepEvent(event, "₍ ･ᴗx ₎", []);
-          }
-        } catch (error) {
-          postRepEvent(event, "₍ xᴗx ₎", []);
-        }
+  if (match[2] !== undefined) {
+    const numericValue = parseInt(match[2]);
+
+    if (!isNaN(numericValue) && numericValue < monoGazoList.length) {
+      const deleteItem = monoGazoList[numericValue];
+
+      // 権限チェック: ownersまたは画像の投稿者
+      const isOwner = owners.includes(event.pubkey);
+      const isAuthor =
+        deleteItem.nostr?.author &&
+        nip19.decode(deleteItem.nostr.author).data === event.pubkey;
+
+      if (!isOwner && !isAuthor) {
+        postRepEvent(event, "この画像を削除する権限がありません", []);
+        return;
       }
+
+      const message = JSON.stringify(deleteItem, null, 2) + "\nを削除します";
+      postRepEvent(event, message, []);
+
+      monoGazoList.splice(numericValue, 1);
+
+      try {
+        monoGazoList.sort((a, b) => new Date(a.date) - new Date(b.date));
+        await writeFile(
+          `${scriptPath}/imageList.json`,
+          JSON.stringify(monoGazoList, null, 2)
+        );
+        try {
+          await gitPush(event);
+        } catch (error) {
+          console.log(error);
+          postRepEvent(event, "₍ ･ᴗx ₎", []);
+        }
+      } catch (error) {
+        postRepEvent(event, "₍ xᴗx ₎", []);
+      }
+    } else {
+      postRepEvent(event, "無効なインデックス番号です", []);
     }
   }
 };
