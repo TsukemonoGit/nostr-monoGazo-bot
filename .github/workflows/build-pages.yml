@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write
-  contents: write
+  contents: read
   pages: write
 
 concurrency:
@@ -23,29 +23,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "npm"
           cache-dependency-path: ./app/package-lock.json
+
       - name: Install dependencies
         run: npm install
         working-directory: ./app
 
-      - uses: snow-actions/git-config-user@v1.0.0
-        with:
-          name: ${{secrets.USER_NAME}}
-          email: ${{secrets.USER_EMAIL}}
-      - run: |
-          set -x
-          git add .
-          git commit -m 'Update imageList.json' || true
-          git push || true
-
       - name: Build
         run: npm run build
         working-directory: ./app
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
@@ -53,6 +46,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: "./app/docs"
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

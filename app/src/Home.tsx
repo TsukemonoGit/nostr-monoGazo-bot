@@ -1,29 +1,61 @@
-import { css } from "../styled-system/css";
-import { createSignal, Index, onMount, Show, type Component } from "solid-js";
-import json from "./assets/data/imageList.json";
+// GitHub経由でimageList.jsonを取得するURL
+const imageListURL =
+  "https://raw.githubusercontent.com/TsukemonoGit/nostr-monoGazo-bot/refs/heads/main/imageList.json";
 
-//import Rss from "./Rss";
+import { css } from "../styled-system/css";
+import {
+  createSignal,
+  Index,
+  onMount,
+  Show,
+  type Component,
+  createResource,
+} from "solid-js";
+
 import MonoGazoPosts from "./MonoGazoPosts";
 import { A } from "@solidjs/router";
 import { JsonData } from "./types/types";
-/* import "@konemono/nostr-web-components";
-import "@konemono/nostr-web-components/style.css"; */
-const jsonData = json as JsonData;
+
+// ATPプロフィール取得関数
+async function fetchAtpProfile(did: string) {
+  const res = await fetch(
+    `https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${did}`
+  );
+  if (!res.ok) throw new Error("failed to fetch atp profile");
+  return res.json();
+}
+
+const AtpAuthor: Component<{ did: string }> = (props) => {
+  const [profile] = createResource(() => props.did, fetchAtpProfile);
+
+  return (
+    <Show when={profile()}>
+      {(p) => (
+        <A
+          href={`https://bsky.app/profile/${props.did}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {p().displayName ?? p().handle ?? props.did}
+        </A>
+      )}
+    </Show>
+  );
+};
 
 const App: Component = () => {
   const [nostrReady, setNostrReady] = createSignal(false);
+  const [jsonData, setJsonData] = createSignal<JsonData>([]);
 
   onMount(async () => {
     try {
-      /*      await import("@konemono/nostr-web-components");
-      await import("@konemono/nostr-web-components/style.css");
-
-      await customElements.whenDefined("nostr-container");
-      await customElements.whenDefined("nostr-profile"); */
-
+      const res = await fetch(imageListURL);
+      if (!res.ok) throw new Error("fetch failed");
+      const data: JsonData = await res.json();
+      setJsonData(data);
       setNostrReady(true);
     } catch (error) {
-      console.error("Failed to load nostr components:", error);
+      console.error("Failed to load data or nostr components:", error);
     }
   });
 
@@ -68,22 +100,21 @@ const App: Component = () => {
         </p>
 
         <Show
-          when={jsonData && jsonData.length > 0}
+          when={jsonData().length > 0}
           fallback={<p class={styles.noData}>No data available.</p>}
         >
           <Show when={nostrReady()}>
             <nostr-container relays='["wss://nos.lol","wss://yabu.me","wss://nostr.compile-error.net"]'>
               <div class={styles.imageList}>
-                <Index each={jsonData.slice().reverse()}>
+                <Index each={jsonData().slice().reverse()}>
                   {(item, index) => {
-                    const reversedIndex = jsonData.length - 1 - index;
+                    const reversedIndex = jsonData().length - 1 - index;
                     const url = item().url;
                     const isVideo =
                       url.endsWith(".mov") ||
                       url.endsWith(".mp4") ||
                       url.endsWith(".avi");
 
-                    // サービスに応じてリンク切り替え
                     const linkHref = item().nostr
                       ? `https://njump.me/${item().nostr!.post_id}`
                       : item().atp
@@ -138,15 +169,7 @@ const App: Component = () => {
                             Author:{" "}
                             <Show
                               when={item().nostr}
-                              fallback={
-                                <A
-                                  href={`https://bsky.app/profile/${item().atp!.author}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  {item().atp!.author}
-                                </A>
-                              }
+                              fallback={<AtpAuthor did={item().atp!.author} />}
                             >
                               <nostr-profile
                                 display="name"
@@ -164,7 +187,6 @@ const App: Component = () => {
           </Show>
         </Show>
       </div>
-      {/*   <Rss /> */}
       <MonoGazoPosts />
     </div>
   );
