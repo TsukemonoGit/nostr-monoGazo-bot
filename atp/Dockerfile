@@ -8,8 +8,9 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download || true
 
-# ソースコードをコピー
-COPY main.go .
+# ソースコードと data ディレクトリをコピー
+COPY main.go ./
+COPY data ./data
 
 # コンテナ起動時にシェルで入る
 CMD ["bash"]

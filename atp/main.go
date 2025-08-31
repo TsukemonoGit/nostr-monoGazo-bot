@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"path/filepath"
 	"flag"
 	"fmt"
 	"log"
@@ -39,6 +40,9 @@ import (
 const name = "bsky-monogazobot"
 const version = "0.0.2"
 const revision = "HEAD"
+
+// GitHub経由でimageList.jsonを取得するURL
+const imageListURL = "https://raw.githubusercontent.com/TsukemonoGit/nostr-monoGazo-bot/refs/heads/main/imageList.json"
 
 type NostrItem struct {
 	Author string `json:"author"`
@@ -100,34 +104,69 @@ func init() {
 	log.Printf("SCRIPTPATH: %s", gitScriptPath)
 	log.Printf("OWNER_DID: %s", ownerDID)
 	log.Printf("HAIKUBOT_HANDLE_DID: %s", botDID)
-	if err := readImageList(); err != nil {
-		log.Fatal("Failed to read imageList.json:", err)
+	if err := fetchImageList(); err != nil {
+		log.Fatal("Failed to fetch imageList.json:", err)
 	}
 }
 
-// imageList.json 読み込み
-func readImageList() error {
-	data, err := os.ReadFile(gitScriptPath + "/imageList.json")
+// GitHub経由でimageList.jsonを取得
+func fetchImageList() error {
+	log.Printf("Fetching imageList from: %s", imageListURL)
+	
+	resp, err := http.Get(imageListURL)
 	if err != nil {
-		if os.IsNotExist(err) {
-			imageList = JsonData{}
-			return nil
-		}
-		return fmt.Errorf("failed to read imageList.json: %w", err)
+		return fmt.Errorf("failed to fetch imageList from GitHub: %w", err)
 	}
-	return json.Unmarshal(data, &imageList)
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to fetch imageList: status code %d", resp.StatusCode)
+	}
+	
+	var fetchedList JsonData
+	if err := json.NewDecoder(resp.Body).Decode(&fetchedList); err != nil {
+		return fmt.Errorf("failed to decode imageList JSON: %w", err)
+	}
+	
+	mu.Lock()
+	imageList = fetchedList
+	mu.Unlock()
+	
+	log.Printf("Successfully fetched %d images from GitHub", len(fetchedList))
+	return nil
+}
+
+func dataFilePath() (string, error) {
+    exePath, err := os.Executable()
+    if err != nil {
+        return "", err
+    }
+    dir := filepath.Dir(exePath)
+    return filepath.Join(dir, "data", "imageList.json"), nil
+}
+
+// imageList.json 読み込み（GitHub取得に変更）
+func readImageList() error {
+    return fetchImageList()
 }
 
 // imageList.json 書き込み
 func writeImageList() error {
-	sort.Slice(imageList, func(i, j int) bool {
-		return imageList[i].Date < imageList[j].Date
-	})
-	data, err := json.MarshalIndent(imageList, "", " ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal imageList: %w", err)
-	}
-	return os.WriteFile(gitScriptPath+"/imageList.json", data, 0644)
+    sort.Slice(imageList, func(i, j int) bool {
+        return imageList[i].Date < imageList[j].Date
+    })
+
+    data, err := json.MarshalIndent(imageList, "", " ")
+    if err != nil {
+        return fmt.Errorf("failed to marshal imageList: %w", err)
+    }
+
+    path, err := dataFilePath()
+    if err != nil {
+        return err
+    }
+
+    return os.WriteFile(path, data, 0644)
 }
 
 type Bot struct {
@@ -358,12 +397,59 @@ func (bot *Bot) analyze(ev Event) error {
 	reMonoGazoLen := regexp.MustCompile("(もの|mono)画像\\s?(length|長さ|枚数|何枚)")
 	reArufofoKure := regexp.MustCompile("(あるん|ある)ふぉふぉ?(下さい|ください|頂戴|ちょうだい).?")
 	reArufofoAgete := regexp.MustCompile("(あるん|ある)ふぉふぉ?(あげて).?")
-	/* reArufofoDouzo := regexp.MustCompile("(npub\\w{59})\\s?(さん|ちゃん|くん)?に(.*)(あるんふぉふぉ|あるふぉふぉ)(.*)(を送って|をおくって|送って|おくって|あげて)") */
-	reMonoGazoAddCmd := regexp.MustCompile("(追加|add)(\\s.*)({.*})")
-	reMonoGazoDeleteCmd := regexp.MustCompile("(削除|delete)\\s*(\\d+)*")
 
+	// 1) 件数リクエスト時にGitHubから最新データを取得
+	if reMonoGazoLen.MatchString(content) || regexp.MustCompile("^もの画像.*数.*$").MatchString(content) {
+		if err := fetchImageList(); err != nil {
+			log.Printf("Failed to fetch latest imageList: %v", err)
+		}
+		mu.Lock()
+		n := len(imageList)
+		mu.Unlock()
+		return bot.post(schema, did, rkey, fmt.Sprintf("もの画像は今全部で%d枚ある", n), nil, nil)
+	}
+
+	// 2) ランダム取得時もGitHubから最新データを取得
+	if reMonoGazoRandom.MatchString(content) {
+		if err := fetchImageList(); err != nil {
+			log.Printf("Failed to fetch latest imageList: %v", err)
+		}
+		mu.Lock()
+		if len(imageList) == 0 {
+			mu.Unlock()
+			return bot.post(schema, did, rkey, "画像なし", nil, nil)
+		}
+		idx := weightedRandomIndex(len(imageList), 2.0)
+		item := imageList[idx]
+		mu.Unlock()
+		return bot.replyWithImageItem(schema, did, rkey, item, idx)
+	}
+
+	// 3) 番号指定時もGitHubから最新データを取得
+	if reMonoGazoNumber.MatchString(content) {
+		if err := fetchImageList(); err != nil {
+			log.Printf("Failed to fetch latest imageList: %v", err)
+		}
+		matches := reMonoGazoNumber.FindStringSubmatch(content)
+		if len(matches) >= 3 {
+			num, _ := strconv.Atoi(matches[2])
+			mu.Lock()
+			if num >= 0 && num < len(imageList) {
+				item := imageList[num]
+				mu.Unlock()
+				return bot.replyWithImageItem(schema, did, rkey, item, num)
+			}
+			mu.Unlock()
+			return bot.post(schema, did, rkey, "番号範囲外", nil, nil)
+		}
+	}
+
+	// 以下の機能はローカルでのGit操作が前提のためコメントアウト
+	// (GitHubからの読み取り専用環境では不要)
+
+	/*
 	// 1) 追加コマンド（Bsky用 JSON）
-	// 例: 「追加 {...json...}」
+	reMonoGazoAddCmd := regexp.MustCompile("(追加|add)(\\s.*)({.*})")
 	if reMonoGazoAddCmd.MatchString(content) && bot.isOwner(did) {
 		matches := reMonoGazoAddCmd.FindStringSubmatch(content)
 		if len(matches) >= 3 {
@@ -430,7 +516,6 @@ func (bot *Bot) analyze(ev Event) error {
 			}
 			if !found {
 				newItem := Item{
-					ID:   fmt.Sprintf("atp-%s/%s", ev.did, ev.rkey),
 					URL:  imageURL,
 					Date: time.Now().Local().Format("2006/1/2"),
 					Memo: "",
@@ -452,6 +537,7 @@ func (bot *Bot) analyze(ev Event) error {
 	}
 
 	// 3) 削除
+	reMonoGazoDeleteCmd := regexp.MustCompile("(削除|delete)\\s*(\\d+)*")
 	if reMonoGazoDeleteCmd.MatchString(content) && bot.isOwner(did) {
 		matches := reMonoGazoDeleteCmd.FindStringSubmatch(content)
 		if len(matches) >= 3 && matches[2] != "" {
@@ -471,50 +557,14 @@ func (bot *Bot) analyze(ev Event) error {
 			return bot.post(schema, did, rkey, "番号範囲外", nil, nil)
 		}
 	}
+	*/
 
-	// 4) 件数
-	if reMonoGazoLen.MatchString(content) || regexp.MustCompile("^もの画像.*数.*$").MatchString(content) {
-		mu.Lock()
-		n := len(imageList)
-		mu.Unlock()
-		return bot.post(schema, did, rkey, fmt.Sprintf("もの画像は今全部で%d枚ある", n), nil, nil)
-	}
-
-	// 5) 番号指定
-	if reMonoGazoNumber.MatchString(content) {
-		matches := reMonoGazoNumber.FindStringSubmatch(content)
-		if len(matches) >= 3 {
-			num, _ := strconv.Atoi(matches[2])
-			mu.Lock()
-			if num >= 0 && num < len(imageList) {
-				item := imageList[num]
-				mu.Unlock()
-				return bot.replyWithImageItem(schema, did, rkey, item, num)
-			}
-			mu.Unlock()
-			return bot.post(schema, did, rkey, "番号範囲外", nil, nil)
-		}
-	}
-
-	// 6) ランダム
-	if reMonoGazoRandom.MatchString(content) {
-		mu.Lock()
-		if len(imageList) == 0 {
-			mu.Unlock()
-			return bot.post(schema, did, rkey, "画像なし", nil, nil)
-		}
-		idx := weightedRandomIndex(len(imageList), 2.0)
-		item := imageList[idx]
-		mu.Unlock()
-		return bot.replyWithImageItem(schema, did, rkey, item, idx)
-	}
-
-	// 7) 和暦
+	// 4) 和暦
 	if reWareki.MatchString(content) {
 		return bot.post(schema, did, rkey, warekiNow()+" らしい", nil, nil)
 	}
 
-	// 8) どこ
+	// 5) どこ
 	if reMonoGazoDoko.MatchString(content) {
 		return bot.post(schema, did, rkey, "₍ ･ᴗ･ ₎ﾖﾝﾀﾞ?", nil, nil)
 	}
@@ -524,7 +574,7 @@ func (bot *Bot) analyze(ev Event) error {
 		return bot.post(schema, did, rkey, txt, nil, nil)
 	}
 
-	// 9) ないんふぉふぉ
+	// 6) ないんふぉふぉ
 	if reNaifofo.MatchString(content) {
 		u := "https://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png"
 		// `replyWithImageItem`を使用して、URLの画像を投稿に添付
@@ -536,7 +586,7 @@ func (bot *Bot) analyze(ev Event) error {
 		return bot.replyWithImageItem(schema, did, rkey, tempItem, -1)
 	}
 
-	// 11) vs ランダム選択
+	// 7) vs ランダム選択
 	if reVs.MatchString(content) {
 		m := reVs.FindStringSubmatch(content)
 		if len(m) >= 2 {
@@ -555,8 +605,8 @@ func (bot *Bot) analyze(ev Event) error {
 		}
 	}
 
-	// 13) あるんふぉふぉ ください／あげて／どうぞ 等（固定画像を返信）
-	if reArufofoKure.MatchString(content) || reArufofoAgete.MatchString(content) /* || reArufofoDouzo.MatchString(content) */ {
+	// 8) あるんふぉふぉ ください／あげて／どうぞ 等（固定画像を返信）
+	if reArufofoKure.MatchString(content) || reArufofoAgete.MatchString(content) {
 		u := "https://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png"
 		return bot.post(schema, did, rkey, "あるんふぉふぉどうぞ\n"+u+"\n#もの画像", nil, nil)
 	}
@@ -564,8 +614,10 @@ func (bot *Bot) analyze(ev Event) error {
 	// 旧コマンド互換
 	reMonoGazo := regexp.MustCompile("^もの画像$")
 	reMonoGazoCount := regexp.MustCompile("^もの画像.*数.*$")
-	reMonoGazoDelete := regexp.MustCompile("^もの画像.*削除\\s+(\\d+).*$")
 	if reMonoGazo.MatchString(content) {
+		if err := fetchImageList(); err != nil {
+			log.Printf("Failed to fetch latest imageList: %v", err)
+		}
 		mu.Lock()
 		if len(imageList) == 0 {
 			mu.Unlock()
@@ -577,32 +629,13 @@ func (bot *Bot) analyze(ev Event) error {
 		return bot.replyWithImageItem(schema, did, rkey, item, idx)
 	}
 	if reMonoGazoCount.MatchString(content) {
+		if err := fetchImageList(); err != nil {
+			log.Printf("Failed to fetch latest imageList: %v", err)
+		}
 		mu.Lock()
 		c := len(imageList)
 		mu.Unlock()
 		return bot.post(schema, did, rkey, fmt.Sprintf("もの画像は今全部で%d枚ある", c), nil, nil)
-	}
-	if reMonoGazoDelete.MatchString(content) && bot.isOwner(did) {
-		m := reMonoGazoDelete.FindStringSubmatch(content)
-		if len(m) > 1 {
-			index, err := strconv.Atoi(m[1])
-			if err != nil {
-				return bot.post(schema, did, rkey, "番号不正", nil, nil)
-			}
-			mu.Lock()
-			if index >= 0 && index < len(imageList) {
-				itemToDelete := imageList[index]
-				err := deleteImage(index)
-				mu.Unlock()
-				if err != nil {
-					return bot.post(schema, did, rkey, "削除失敗", nil, nil)
-				}
-				_ = gitPush()
-				return bot.post(schema, did, rkey, fmt.Sprintf("削除:\nURL: %s", itemToDelete.URL), nil, nil)
-			}
-			mu.Unlock()
-			return bot.post(schema, did, rkey, "番号範囲外", nil, nil)
-		}
 	}
 
 	return nil
@@ -652,7 +685,7 @@ func (bot *Bot) replyWithImageItem(schema, did, rkey string, imageItem Item, ind
 	var linkText string
 	if imageItem.Atp != nil {
 		linkURL = fmt.Sprintf("https://bsky.app/profile/%s/post/%s", imageItem.Atp.Author, imageItem.Atp.ID)
-		linkText = fmt.Sprintf("at://%s/app.bsky.feed.post/%s", imageItem.Atp.Author, imageItem.Atp.ID)
+		linkText = fmt.Sprintf("https://bsky.app/profile/%s/post/%s", imageItem.Atp.Author, imageItem.Atp.ID)
 		postText = fmt.Sprintf("%s\n%s", postText, linkText)
 	} else if imageItem.Nostr != nil {
 		linkURL = fmt.Sprintf("https://lumilumi.app/%s", imageItem.Nostr.PostID)
@@ -679,7 +712,9 @@ func (bot *Bot) replyWithImageItem(schema, did, rkey string, imageItem Item, ind
 			return ""
 		}(), index)
 	}
-	postText = postText + extra
+	if index >= 0 {
+		postText = postText + extra
+	}
 
 	// facets
 	var facets []*bsky.RichtextFacet

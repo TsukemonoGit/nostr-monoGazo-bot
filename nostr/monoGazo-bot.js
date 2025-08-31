@@ -508,17 +508,33 @@ const res_monoGazo = (event, regex) => {
         ["t", "もの画像"],
       ];
 
-      postRepEvent(
-        event,
-        `#もの画像\n${monoGazoList[urlIndex].url}\n作: nostr:${
-          monoGazoList[urlIndex].nostr.author
-        } (${monoGazoList[urlIndex].date}) ${
-          monoGazoList[urlIndex].memo
-            ? " (" + monoGazoList[urlIndex].memo + ")"
-            : ""
-        } \nnostr:${monoGazoList[urlIndex].nostr.post_id}`,
-        tags
-      );
+      if (monoGazoList[urlIndex].nostr) {
+        postRepEvent(
+          event,
+          `#もの画像\n${monoGazoList[urlIndex].url}\n作: nostr:${
+            monoGazoList[urlIndex].nostr.author
+          } (${monoGazoList[urlIndex].date}) ${
+            monoGazoList[urlIndex].memo
+              ? " (" + monoGazoList[urlIndex].memo + ")"
+              : ""
+          } \nnostr:${monoGazoList[urlIndex].nostr.post_id}`,
+          tags
+        );
+      } else if (monoGazoList[urlIndex].atp) {
+        postRepEvent(
+          event,
+          `#もの画像\n${monoGazoList[urlIndex].url}\nhttps://bsky.app/profile/${
+            monoGazoList[urlIndex].atp.author
+          }/post/${monoGazoList[urlIndex].atp.id} (${
+            monoGazoList[urlIndex].date
+          }) ${
+            monoGazoList[urlIndex].memo
+              ? " (" + monoGazoList[urlIndex].memo + ")"
+              : ""
+          }`,
+          tags
+        );
+      }
     } catch (error) {
       console.log("decode errorかな");
     }
