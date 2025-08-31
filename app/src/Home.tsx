@@ -2,7 +2,7 @@
 const imageListURL =
   "https://raw.githubusercontent.com/TsukemonoGit/nostr-monoGazo-bot/refs/heads/main/imageList.json";
 
-import { css } from "../styled-system/css";
+import { css, cx } from "../styled-system/css";
 import {
   createSignal,
   Index,
@@ -15,6 +15,7 @@ import {
 import MonoGazoPosts from "./MonoGazoPosts";
 import { A } from "@solidjs/router";
 import { JsonData } from "./types/types";
+import { getItemStyle, itemStyles } from "./borderColors";
 
 // ATPプロフィール取得関数
 async function fetchAtpProfile(did: string) {
@@ -60,6 +61,7 @@ const App: Component = () => {
   });
 
   const rootUrl = window.location.origin + "/nostr-monoGazo-bot/";
+
   return (
     <div class={styles.appContainer}>
       <div class={styles.container}>
@@ -122,7 +124,7 @@ const App: Component = () => {
                         : "#";
 
                     return (
-                      <div class={styles.imageItem} id={item().id}>
+                      <div class={getItemStyle(item())} id={item().id}>
                         <Show
                           when={isVideo}
                           fallback={
@@ -234,17 +236,6 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
     gap: "20px",
-  }),
-
-  imageItem: css({
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "14px 12px",
-    border: "1px solid #ddd",
-    borderRadius: "5px",
-    backgroundColor: "#fafafa",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
   }),
 
   imageInfo: css({
