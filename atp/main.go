@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"path/filepath"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"log/slog"
 	"math"
@@ -16,6 +16,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"sort"
@@ -76,6 +77,17 @@ var (
 	botDID         string
 	// 乱数生成器（Go 1.20+ 対応）
 	rng *rand.Rand
+	// goroutine管理用
+	heartbeatSem = make(chan struct{}, 1) // heartbeat用セマフォ
+	// 共有HTTPクライアント
+	httpClient = &http.Client{
+		Timeout: 15 * time.Second,
+		Transport: &http.Transport{
+			MaxIdleConns:        10,
+			MaxIdleConnsPerHost: 2,
+			IdleConnTimeout:     30 * time.Second,
+		},
+	}
 )
 
 type Event struct {
@@ -112,61 +124,65 @@ func init() {
 // GitHub経由でimageList.jsonを取得
 func fetchImageList() error {
 	log.Printf("Fetching imageList from: %s", imageListURL)
-	
-	resp, err := http.Get(imageListURL)
+
+	resp, err := httpClient.Get(imageListURL)
 	if err != nil {
 		return fmt.Errorf("failed to fetch imageList from GitHub: %w", err)
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to fetch imageList: status code %d", resp.StatusCode)
 	}
-	
+
+	// メモリ使用量制限（最大5MB）
+	const maxSize = 5 * 1024 * 1024
+	limitedReader := &io.LimitedReader{R: resp.Body, N: maxSize}
+
 	var fetchedList JsonData
-	if err := json.NewDecoder(resp.Body).Decode(&fetchedList); err != nil {
+	if err := json.NewDecoder(limitedReader).Decode(&fetchedList); err != nil {
 		return fmt.Errorf("failed to decode imageList JSON: %w", err)
 	}
-	
+
 	mu.Lock()
 	imageList = fetchedList
 	mu.Unlock()
-	
+
 	log.Printf("Successfully fetched %d images from GitHub", len(fetchedList))
 	return nil
 }
 
 func dataFilePath() (string, error) {
-    exePath, err := os.Executable()
-    if err != nil {
-        return "", err
-    }
-    dir := filepath.Dir(exePath)
-    return filepath.Join(dir, "data", "imageList.json"), nil
+	exePath, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	dir := filepath.Dir(exePath)
+	return filepath.Join(dir, "data", "imageList.json"), nil
 }
 
 // imageList.json 読み込み（GitHub取得に変更）
 func readImageList() error {
-    return fetchImageList()
+	return fetchImageList()
 }
 
 // imageList.json 書き込み
 func writeImageList() error {
-    sort.Slice(imageList, func(i, j int) bool {
-        return imageList[i].Date < imageList[j].Date
-    })
+	sort.Slice(imageList, func(i, j int) bool {
+		return imageList[i].Date < imageList[j].Date
+	})
 
-    data, err := json.MarshalIndent(imageList, "", " ")
-    if err != nil {
-        return fmt.Errorf("failed to marshal imageList: %w", err)
-    }
+	data, err := json.MarshalIndent(imageList, "", " ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal imageList: %w", err)
+	}
 
-    path, err := dataFilePath()
-    if err != nil {
-        return err
-    }
+	path, err := dataFilePath()
+	if err != nil {
+		return err
+	}
 
-    return os.WriteFile(path, data, 0644)
+	return os.WriteFile(path, data, 0644)
 }
 
 type Bot struct {
@@ -448,115 +464,115 @@ func (bot *Bot) analyze(ev Event) error {
 	// (GitHubからの読み取り専用環境では不要)
 
 	/*
-	// 1) 追加コマンド（Bsky用 JSON）
-	reMonoGazoAddCmd := regexp.MustCompile("(追加|add)(\\s.*)({.*})")
-	if reMonoGazoAddCmd.MatchString(content) && bot.isOwner(did) {
-		matches := reMonoGazoAddCmd.FindStringSubmatch(content)
-		if len(matches) >= 3 {
-			var p addPayload
-			jsonPart := matches[3]
-			if err := json.Unmarshal([]byte(jsonPart), &p); err != nil {
-				return bot.post(schema, did, rkey, "JSONの解析に失敗", nil, nil)
-			}
-			if strings.TrimSpace(p.URL) == "" {
-				return bot.post(schema, did, rkey, "urlが空", nil, nil)
-			}
-			mu.Lock()
-			dup := false
-			for _, it := range imageList {
-				if it.URL == p.URL {
-					dup = true
-					break
+		// 1) 追加コマンド（Bsky用 JSON）
+		reMonoGazoAddCmd := regexp.MustCompile("(追加|add)(\\s.*)({.*})")
+		if reMonoGazoAddCmd.MatchString(content) && bot.isOwner(did) {
+			matches := reMonoGazoAddCmd.FindStringSubmatch(content)
+			if len(matches) >= 3 {
+				var p addPayload
+				jsonPart := matches[3]
+				if err := json.Unmarshal([]byte(jsonPart), &p); err != nil {
+					return bot.post(schema, did, rkey, "JSONの解析に失敗", nil, nil)
 				}
-			}
-			if !dup {
-				newItem := Item{
-					ID:   fmt.Sprintf("atp-%s/%s", did, rkey),
-					URL:  p.URL,
-					Date: p.Date,
-					Memo: p.Memo,
-					Atp:  &AtpItem{Author: p.Atp.Author, ID: p.Atp.ID},
+				if strings.TrimSpace(p.URL) == "" {
+					return bot.post(schema, did, rkey, "urlが空", nil, nil)
 				}
-				imageList = append(imageList, newItem)
-				sort.Slice(imageList, func(i, j int) bool {
-					return imageList[i].Date < imageList[j].Date
-				})
-			}
-			mu.Unlock()
-			if err := writeImageList(); err != nil {
-				return bot.post(schema, did, rkey, "保存に失敗", nil, nil)
-			}
-			_ = gitPush()
-			return bot.post(schema, did, rkey, "追加完了", nil, nil)
-		}
-	}
-
-	// 2) 添付画像で追加（元の挙動を維持）
-	reMonoGazoAdd := regexp.MustCompile("^もの画像追加$")
-	if reMonoGazoAdd.MatchString(content) {
-		if !bot.isOwner(ev.did) {
-			return bot.post(schema, did, rkey, "権限がありません", nil, nil)
-		}
-		if len(ev.images) == 0 {
-			return bot.post(schema, did, rkey, "画像がありません", nil, nil)
-		}
-		mu.Lock()
-		addedCount := 0
-		for _, img := range ev.images {
-			if img.Image == nil || img.Image.Ref.String() == "" {
-				continue
-			}
-			imageURL := img.Image.Ref.String()
-			found := false
-			for _, item := range imageList {
-				if item.URL == imageURL {
-					found = true
-					break
+				mu.Lock()
+				dup := false
+				for _, it := range imageList {
+					if it.URL == p.URL {
+						dup = true
+						break
+					}
 				}
-			}
-			if !found {
-				newItem := Item{
-					URL:  imageURL,
-					Date: time.Now().Local().Format("2006/1/2"),
-					Memo: "",
-					Atp:  &AtpItem{Author: ev.did, ID: ev.rkey},
+				if !dup {
+					newItem := Item{
+						ID:   fmt.Sprintf("atp-%s/%s", did, rkey),
+						URL:  p.URL,
+						Date: p.Date,
+						Memo: p.Memo,
+						Atp:  &AtpItem{Author: p.Atp.Author, ID: p.Atp.ID},
+					}
+					imageList = append(imageList, newItem)
+					sort.Slice(imageList, func(i, j int) bool {
+						return imageList[i].Date < imageList[j].Date
+					})
 				}
-				imageList = append(imageList, newItem)
-				addedCount++
-			}
-		}
-		mu.Unlock()
-		if addedCount > 0 {
-			if err := writeImageList(); err != nil {
-				return bot.post(schema, did, rkey, "保存に失敗", nil, nil)
-			}
-			_ = gitPush()
-			return bot.post(schema, did, rkey, fmt.Sprintf("%d枚追加。総数%d", addedCount, len(imageList)), nil, nil)
-		}
-		return bot.post(schema, did, rkey, "新規なし", nil, nil)
-	}
-
-	// 3) 削除
-	reMonoGazoDeleteCmd := regexp.MustCompile("(削除|delete)\\s*(\\d+)*")
-	if reMonoGazoDeleteCmd.MatchString(content) && bot.isOwner(did) {
-		matches := reMonoGazoDeleteCmd.FindStringSubmatch(content)
-		if len(matches) >= 3 && matches[2] != "" {
-			idx, err := strconv.Atoi(matches[2])
-			if err != nil {
-				return bot.post(schema, did, rkey, "番号不正", nil, nil)
-			}
-			mu.Lock()
-			if idx >= 0 && idx < len(imageList) {
-				del := imageList[idx]
-				_ = deleteImage(idx)
 				mu.Unlock()
+				if err := writeImageList(); err != nil {
+					return bot.post(schema, did, rkey, "保存に失敗", nil, nil)
+				}
 				_ = gitPush()
-				return bot.post(schema, did, rkey, fmt.Sprintf("削除:\nURL: %s", del.URL), nil, nil)
+				return bot.post(schema, did, rkey, "追加完了", nil, nil)
+			}
+		}
+
+		// 2) 添付画像で追加（元の挙動を維持）
+		reMonoGazoAdd := regexp.MustCompile("^もの画像追加$")
+		if reMonoGazoAdd.MatchString(content) {
+			if !bot.isOwner(ev.did) {
+				return bot.post(schema, did, rkey, "権限がありません", nil, nil)
+			}
+			if len(ev.images) == 0 {
+				return bot.post(schema, did, rkey, "画像がありません", nil, nil)
+			}
+			mu.Lock()
+			addedCount := 0
+			for _, img := range ev.images {
+				if img.Image == nil || img.Image.Ref.String() == "" {
+					continue
+				}
+				imageURL := img.Image.Ref.String()
+				found := false
+				for _, item := range imageList {
+					if item.URL == imageURL {
+						found = true
+						break
+					}
+				}
+				if !found {
+					newItem := Item{
+						URL:  imageURL,
+						Date: time.Now().Local().Format("2006/1/2"),
+						Memo: "",
+						Atp:  &AtpItem{Author: ev.did, ID: ev.rkey},
+					}
+					imageList = append(imageList, newItem)
+					addedCount++
+				}
 			}
 			mu.Unlock()
-			return bot.post(schema, did, rkey, "番号範囲外", nil, nil)
+			if addedCount > 0 {
+				if err := writeImageList(); err != nil {
+					return bot.post(schema, did, rkey, "保存に失敗", nil, nil)
+				}
+				_ = gitPush()
+				return bot.post(schema, did, rkey, fmt.Sprintf("%d枚追加。総数%d", addedCount, len(imageList)), nil, nil)
+			}
+			return bot.post(schema, did, rkey, "新規なし", nil, nil)
 		}
-	}
+
+		// 3) 削除
+		reMonoGazoDeleteCmd := regexp.MustCompile("(削除|delete)\\s*(\\d+)*")
+		if reMonoGazoDeleteCmd.MatchString(content) && bot.isOwner(did) {
+			matches := reMonoGazoDeleteCmd.FindStringSubmatch(content)
+			if len(matches) >= 3 && matches[2] != "" {
+				idx, err := strconv.Atoi(matches[2])
+				if err != nil {
+					return bot.post(schema, did, rkey, "番号不正", nil, nil)
+				}
+				mu.Lock()
+				if idx >= 0 && idx < len(imageList) {
+					del := imageList[idx]
+					_ = deleteImage(idx)
+					mu.Unlock()
+					_ = gitPush()
+					return bot.post(schema, did, rkey, fmt.Sprintf("削除:\nURL: %s", del.URL), nil, nil)
+				}
+				mu.Unlock()
+				return bot.post(schema, did, rkey, "番号範囲外", nil, nil)
+			}
+		}
 	*/
 
 	// 4) 和暦
@@ -648,7 +664,8 @@ func (bot *Bot) replyWithImageItem(schema, did, rkey string, imageItem Item, ind
 		log.Printf("Failed to create XRPCC: %v", err)
 		return bot.post(schema, did, rkey, "画像取得失敗", nil, nil)
 	}
-	resp, err := http.Get(imageItem.URL)
+
+	resp, err := httpClient.Get(imageItem.URL)
 	if err != nil {
 		log.Printf("Failed to download image from %s: %v", imageItem.URL, err)
 		return bot.post(schema, did, rkey, "画像取得失敗", nil, nil)
@@ -658,22 +675,43 @@ func (bot *Bot) replyWithImageItem(schema, did, rkey string, imageItem Item, ind
 		log.Printf("Failed to download image: status code %d", resp.StatusCode)
 		return bot.post(schema, did, rkey, "画像取得失敗", nil, nil)
 	}
+
+	// HTTPヘッダーから正確なMIMEタイプを取得
+	mimeType := resp.Header.Get("Content-Type")
+	if mimeType == "" {
+		mimeType = getMimeType(imageItem.URL) // フォールバック
+	}
+
+	// メモリ使用量制限（最大10MB）
+	const maxImageSize = 10 * 1024 * 1024
+	limitedReader := &io.LimitedReader{R: resp.Body, N: maxImageSize}
+
 	imgBytes := new(bytes.Buffer)
-	_, err = imgBytes.ReadFrom(resp.Body)
+	written, err := imgBytes.ReadFrom(limitedReader)
 	if err != nil {
 		log.Printf("Failed to read image data: %v", err)
 		return bot.post(schema, did, rkey, "画像取得失敗", nil, nil)
 	}
+
+	// サイズチェック
+	if written >= maxImageSize {
+		log.Printf("Image too large: %d bytes", written)
+		return bot.post(schema, did, rkey, "画像サイズ超過", nil, nil)
+	}
+
 	uploadResp, err := comatproto.RepoUploadBlob(context.TODO(), xrpcc, imgBytes)
 	if err != nil {
 		log.Printf("Failed to upload blob: %v", err)
 		return bot.post(schema, did, rkey, "アップロード失敗", nil, nil)
 	}
+
+	log.Printf("Image MIME type: %s, Size: %d bytes", mimeType, written)
+
 	images := []*bsky.EmbedImages_Image{
 		{
 			Image: &lexutil.LexBlob{
 				Ref:      uploadResp.Blob.Ref,
-				MimeType: getMimeType(imageItem.URL),
+				MimeType: mimeType,
 				Size:     uploadResp.Blob.Size,
 			},
 			Alt: "",
@@ -776,7 +814,16 @@ func run() error {
 				retry = 0
 			case <-hbtimer.C:
 				if url := os.Getenv("HEARTBEAT_URL"); url != "" {
-					go heartbeatPush(url)
+					// goroutine管理：既に実行中なら新しく作らない
+					select {
+					case heartbeatSem <- struct{}{}:
+						go func() {
+							defer func() { <-heartbeatSem }()
+							heartbeatPush(url)
+						}()
+					default:
+						log.Println("heartbeat already running, skipping")
+					}
 				}
 			case <-time.After(10 * time.Second):
 				retry++
@@ -878,12 +925,13 @@ func main() {
 }
 
 func heartbeatPush(url string) {
-	resp, err := http.Get(url)
+	resp, err := httpClient.Get(url)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println("heartbeat error:", err.Error())
 		return
 	}
 	defer resp.Body.Close()
+	log.Printf("heartbeat sent: status %d", resp.StatusCode)
 }
 
 func deleteImage(index int) error {
