@@ -36,6 +36,22 @@ const AtpAuthor: Component<{ did: string }> = (props) => {
           href={`https://bsky.app/profile/${props.did}`}
           target="_blank"
           rel="noopener noreferrer"
+          class={css({
+            color: "#0066cc",
+            textDecoration: "underline",
+            textDecorationColor: "transparent",
+            fontWeight: "500",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            "&:hover": {
+              color: "#0050b3",
+              textDecorationColor: "#0050b3",
+              textShadow: "0 1px 2px rgba(0, 102, 204, 0.2)",
+            },
+            "&:active": {
+              color: "#003d82",
+            },
+          })}
         >
           {p().displayName ?? p().handle ?? props.did}
         </A>
