@@ -15,7 +15,7 @@ import {
 import MonoGazoPosts from "./MonoGazoPosts";
 import { A } from "@solidjs/router";
 import { JsonData } from "./types/types";
-import { getItemStyle, itemStyles } from "./borderColors";
+import { getItemStyleClass } from "./borderColors";
 
 // ATPプロフィール取得関数
 async function fetchAtpProfile(did: string) {
@@ -140,7 +140,7 @@ const App: Component = () => {
                         : "#";
 
                     return (
-                      <div class={getItemStyle(item())} id={item().id}>
+                      <div class={getItemStyleClass(item())} id={item().id}>
                         <Show
                           when={isVideo}
                           fallback={
@@ -223,6 +223,7 @@ const styles = {
   container: css({
     padding: "20px",
     maxWidth: "1100px",
+
     margin: "0 auto",
     "@media (min-width: 800px) and (max-width: 1600px)": {
       marginRight: "18em",

@@ -1,4 +1,7 @@
 import { css } from "../styled-system/css";
+import { cva } from "../styled-system/css/cva";
+// アイテムタイプ判定
+type ItemType = "nostr" | "atp" | "default";
 // サービス種別ごとのボーダー色定義
 const borderColors = {
   nostr: "#ffb2d2ff",
@@ -6,35 +9,61 @@ const borderColors = {
   default: "token(colors.gray.300)",
 } as const;
 
-// 基本アイテムスタイル定義
-const baseItemStyle = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  padding: "14px 12px",
-  borderRadius: "5px",
-  backgroundColor: "#fafafa",
-  boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-} as const;
-
-// 事前定義されたスタイルクラス
-export const itemStyles = {
-  nostr: css({
-    ...baseItemStyle,
-    border: `2px solid ${borderColors.nostr}`,
-  }),
-  atp: css({
-    ...baseItemStyle,
-    border: `2px solid ${borderColors.atp}`,
-  }),
-  default: css({
-    ...baseItemStyle,
-    border: `2px solid ${borderColors.default}`,
-  }),
-} as const;
-
-// アイテムタイプ判定
-type ItemType = "nostr" | "atp" | "default";
+// アイテムのスタイル定義（CVAでバリアント化）
+export const itemStyle = cva({
+  base: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: "14px 12px",
+    borderRadius: "5px",
+    backgroundColor: "#fafafa",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+    position: "relative", // 疑似要素の位置指定のために必要
+    borderWidth: "2px",
+    borderStyle: "solid",
+  },
+  variants: {
+    type: {
+      nostr: {
+        borderColor: borderColors.nostr,
+        _before: {
+          content: '"N"', // 'nostr'用のマーク
+          position: "absolute",
+          top: "4px",
+          left: "4px",
+          fontSize: "12px",
+          lineHeight: 1,
+          fontWeight: "bold",
+          color: borderColors.nostr,
+          backgroundColor: "#fff",
+          borderRadius: "2px",
+          padding: "0 2px",
+          zIndex: 10,
+        },
+      },
+      atp: {
+        borderColor: borderColors.atp,
+        _before: {
+          content: '"A"', // 'atp'用のマーク
+          position: "absolute",
+          top: "4px",
+          left: "4px",
+          fontSize: "12px",
+          fontWeight: "bold",
+          color: borderColors.atp,
+          backgroundColor: "#fff",
+          borderRadius: "2px",
+          padding: "0 2px",
+          zIndex: 10,
+        },
+      },
+      default: {
+        borderColor: borderColors.default,
+      },
+    },
+  },
+});
 
 const getItemType = (item: any): ItemType => {
   if (item.nostr) return "nostr";
@@ -42,17 +71,8 @@ const getItemType = (item: any): ItemType => {
   return "default";
 };
 
-// スタイル選択関数（推奨）
+// スタイルクラスを生成する関数
 export const getItemStyleClass = (item: any): string => {
   const itemType = getItemType(item);
-  return itemStyles[itemType];
-};
-
-// 動的スタイル生成関数（非推奨 - パフォーマンス上の理由）
-export const getItemStyle = (item: any): string => {
-  const itemType = getItemType(item);
-  return css({
-    ...baseItemStyle,
-    border: `2px solid ${borderColors[itemType]}`,
-  });
+  return itemStyle({ type: itemType });
 };
