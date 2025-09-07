@@ -6,6 +6,7 @@
   background-position: center;
   left: 0;
   right: 0;
+  /* アイコンが大きすぎる場合や、背景色をより透過させたい場合は、以下のプロパティを調整 */
   background-image: url("/nostr-monoGazo-bot/images/arufofo.png");
   background-color: rgba(255, 255, 255, 0.6);
   background-blend-mode: lighten;
@@ -20,18 +21,21 @@
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 20px;
-  display: flex;
+  /* タイトルが画面中央に来るように調整 */
+  text-align: center;
   margin-top: 20px;
 }
 
 .grid {
   margin-top: 10px;
   display: grid;
-  grid-template-columns: fit-content(35%) fit-content(25%) 1fr;
-
+  /* NostrとATPの列を追加し、合計4列に調整 */
+  /* 各列の幅をfit-contentで内容に合わせて柔軟に設定 */
+  grid-template-columns: fit-content(25%) fit-content(20%) fit-content(20%) 1fr;
   border: solid;
   border-color: rgb(73, 73, 73);
   border-radius: 10px;
+  overflow: hidden; /* コンテンツがはみ出さないように設定 */
 }
 
 .gridItem {
@@ -42,6 +46,8 @@
   background-color: rgba(255, 255, 255, 0.5);
   word-break: break-word;
   white-space: pre-wrap;
+  /* グリッドのセル内のテキストを中央揃えにする場合 */
+  /* text-align: center; */
 }
 
 .hr {
