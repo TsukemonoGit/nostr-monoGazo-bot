@@ -643,11 +643,20 @@ const res_monoGazo_add = async (event, regex) => {
   if (owners.includes(event.pubkey)) {
     const match = event.content.trim().match(regex);
     if (match === null) {
-      throw new Error();
+      throw new Error("正規表現にマッチしません");
     }
-    if (match[3] !== undefined) {
-      const newData = JSON.parse(match[3]);
-      addMonogazoList(newData, event);
+    const data = match.groups.jsonData; // 名前付きキャプチャグループを使用
+    console.log(data);
+    if (data !== undefined) {
+      try {
+        const newData = JSON.parse(data);
+        await addMonogazoList(newData, event);
+      } catch (error) {
+        console.error("JSON parse error:", error);
+        console.error("JSON string:", data);
+        if (event)
+          postRepEvent(event, "JSONの形式が正しくありません ₍ xᴗx ₎", []);
+      }
     }
   }
 };
@@ -655,32 +664,46 @@ const res_monoGazo_add = async (event, regex) => {
 /**
  * monoGazoListに新しい画像データを追加する関数
  * @param {Object} newData - 追加する画像データ
- *   {
- *     url: "画像URL",
- *     author: "npubまたは文字列",
- *     date: "YYYY/MM/DD",
- *     note: "noteIDまたは文字列",
- *     memo: "任意のメモ",
- *     nostr: { author: "npub...", post_id: "note..." },
- *     atp: { author: "user.bsky.social", post_id: "at://..." }
- *   }
+ *   nostr形式: { url: "画像URL", date: "YYYY/MM/DD", author: "npub...", note: "note...", memo?: "メモ" }
+ *   または: { url: "画像URL", date: "YYYY/MM/DD", nostr: { author: "npub...", post_id: "note..." }, memo?: "メモ" }
+ *   atp形式: { url: "画像URL", date: "YYYY/MM/DD", atp: { author: "did:...", id: "..." }, memo?: "メモ" }
  * @param {Object|null} event - 追加操作を行ったNostrイベント（リプライ用）
  */
 async function addMonogazoList(newData, event) {
   // 同じURLが存在する場合は追加せず終了
   const isDuplicate = monoGazoList.some((item) => item.url === newData.url);
   if (isDuplicate) return;
+
   //@type Item
-  const saveData = {
+  let saveData = {
     id: newData.id,
     url: newData.url,
     date: newData.date,
     memo: newData.memo,
-    nostr: {
+  };
+
+  // nostr形式のデータ処理
+  if (newData.nostr) {
+    // nostrオブジェクトがある場合
+    saveData.nostr = {
+      author: newData.nostr.author.replace("nostr:", ""),
+      post_id: newData.nostr.post_id.replace("nostr:", ""),
+    };
+  } else if (newData.author && newData.note) {
+    // 旧形式（authorとnoteフィールド）の場合
+    saveData.nostr = {
       author: newData.author.replace("nostr:", ""),
       post_id: newData.note.replace("nostr:", ""),
-    },
-  };
+    };
+  }
+
+  // atp形式のデータ処理
+  if (newData.atp) {
+    saveData.atp = {
+      author: newData.atp.author,
+      id: newData.atp.id,
+    };
+  }
 
   // monoGazoListに追加
   monoGazoList.push(saveData);
@@ -891,9 +914,9 @@ const resmapReply = [
     /(npub\w{59})\s?(さん|ちゃん|くん)?に(.*)(あるんふぉふぉ|あるふぉふぉ)(.*)(を送って|をおくって|送って|おくって|あげて)/,
     res_arufofo_douzo,
   ],
-  [/(追加|add)(\s.*)({.*})/ims, res_monoGazo_add],
-  [/(削除|delete)\s*(\d+)*/i, res_monoGazo_delete],
-  // ↓この1行を追加
+  [/^(追加|add)\s+(?<jsonData>{.+})$/s, res_monoGazo_add],
+  [/^(削除|delete)\s*(\d+)*/i, res_monoGazo_delete],
+
   [/^(\d+)$/, res_image_selection],
 ];
 
