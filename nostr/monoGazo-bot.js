@@ -927,6 +927,8 @@ const resmapReply = [
   [/^(削除|delete)\s*(\d+)*/i, res_monoGazo_delete],
 
   [/^(\d+)$/, res_image_selection],
+  [/^(.{1,50}(?:vs.{1,50})+)して$/, res_vs_random],
+  [/^方向$/i, res_randomHoukou],
 ];
 
 //-------------------------------
