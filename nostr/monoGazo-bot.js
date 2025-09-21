@@ -814,6 +814,14 @@ export const res_randomNip = async (event, regex) => {
   const content = `NIP-${randomIndex}\nhttps://github.com/nostr-protocol/nips/blob/master/${randomIndex}.md`;
   postRepEvent(event, content, []);
 };
+
+export const res_randomHoukou = async (event, regex) => {
+  console.log("ランダム方向");
+  const houkou = ["→", "↗", "↑", "↖", "←", "↙", "↓", "↘"];
+  const content = houkou[Math.floor(Math.random() * houkou.length)];
+
+  postRepEvent(event, content, []);
+};
 //[RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => [string, string[][]] | null][]
 
 // 画像選択処理の関数
@@ -899,6 +907,7 @@ const resmapNormal = [
   [/^もの、(.{1,50}(?:vs.{1,50})+)して$/, res_vs_random],
   [/(もの|mono)画像\s?(\d+)$/i, res_monoGazo],
   [/^もの、ランダムNIP(して)?$/i, res_randomNip],
+  [/^もの、方向$/i, res_randomHoukou],
 ];
 //: [RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => Promise<[string, string[][]]> | [string, string[][]] | null][]
 const resmapReply = [
