@@ -907,7 +907,7 @@ const resmapNormal = [
   [/^もの、(.{1,50}(?:vs.{1,50})+)して$/, res_vs_random],
   [/(もの|mono)画像\s?(\d+)$/i, res_monoGazo],
   [/^もの、ランダムNIP(して)?$/i, res_randomNip],
-  [/^もの、方向$/i, res_randomHoukou],
+  [/^もの、(方向|どっち)$/i, res_randomHoukou],
 ];
 //: [RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => Promise<[string, string[][]]> | [string, string[][]] | null][]
 const resmapReply = [
@@ -928,7 +928,7 @@ const resmapReply = [
 
   [/^(\d+)$/, res_image_selection],
   [/^(.{1,50}(?:vs.{1,50})+)して$/, res_vs_random],
-  [/^方向$/i, res_randomHoukou],
+  [/^(方向|どっち)$/i, res_randomHoukou],
 ];
 
 //-------------------------------
