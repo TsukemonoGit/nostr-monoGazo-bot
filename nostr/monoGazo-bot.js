@@ -177,6 +177,9 @@ const postRepEvent = async (event, content, tags) => {
 // Start subscription
 const subscription = observable.subscribe(async (packet) => {
   if (packet.event.kind === 30003) {
+    if (!packet.event.created_at < Date.now() / 1000 - 10 * 60) {
+      return; //昔のイベントは無視
+    }
     console.log(packet);
     getMonogazoEvent(packet.event)
       .then(async (receivedEvent) => {
@@ -277,6 +280,7 @@ rxReq.emit([
       "84b0c46ab699ac35eb2ca286470b85e081db2087cdef63932236c397417782f5",
     ],
     "#d": [bookmarkTag],
+    since: Date.now() / 1000 - 10 * 60,
   },
 ]);
 
@@ -1066,7 +1070,7 @@ async function postImageSelectionRequest(
   });
 
   // 投稿
-  postEvent(1, content, tags);
+  postEvent(42, content, tags);
 }
 
 // 選択データのクリーンアップ（30分後に自動削除）
