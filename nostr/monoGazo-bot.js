@@ -53,7 +53,10 @@ const rxNostr = createRxNostr({
   websocketCtor: WebSocket,
   signer: seckeySigner(nsec),
 });
-rxNostr.setDefaultRelays(["wss://yabu.me", "wss://r.kojira.io"]); //, "wss://relay-jp.nostr.wirednet.jp"
+rxNostr.setDefaultRelays([
+  "wss://relay-jp.nostr.wirednet.jp",
+  "wss://x.kojira.io",
+]); //, "wss://relay-jp.nostr.wirednet.jp","wss://yabu.me",
 
 const rxReq = createRxForwardReq();
 
@@ -177,7 +180,7 @@ const postRepEvent = async (event, content, tags) => {
 // Start subscription
 const subscription = observable.subscribe(async (packet) => {
   if (packet.event.kind === 30003) {
-    if (!packet.event.created_at < Date.now() / 1000 - 10 * 60) {
+    if (packet.event.created_at < Date.now() / 1000 - 10 * 60) {
       return; //昔のイベントは無視
     }
     console.log(packet);
@@ -280,11 +283,10 @@ rxReq.emit([
       "84b0c46ab699ac35eb2ca286470b85e081db2087cdef63932236c397417782f5",
     ],
     "#d": [bookmarkTag],
-    since: Date.now() / 1000 - 10 * 60,
   },
 ]);
 
-const weightRatio = 2; // 最後のインデックスが最初のインデックスの2倍の確率で選ばれるようにする
+const weightRatio = 1.5; // 最後のインデックスが最初のインデックスの2倍の確率で選ばれるようにする
 const weightedRandomIndex = (length) => {
   // インデックスの重みを一定の比率で増加させる
 
@@ -1003,7 +1005,7 @@ function getEventById(eventId) {
 
 // 複数画像URLを取得する関数（新規追加）
 function getUrls(content) {
-  const urlPattern = /(https?:\/\/[^\s]+\.(webp|png|jpe?g|gif|svg))/gi;
+  const urlPattern = /(https?:\/\/[^\s]+\.(webp|png|jpe?g|gif|svg|mp4))/gi;
   const matches = content.match(urlPattern);
   return matches || [];
 }
