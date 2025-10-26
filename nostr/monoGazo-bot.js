@@ -58,7 +58,7 @@ rxNostr.setDefaultRelays([
   "wss://x.kojira.io",
 ]); //, "wss://relay-jp.nostr.wirednet.jp","wss://yabu.me",
 
-const rxReq = createRxForwardReq();
+const rxReq = createRxForwardReq({ connectionStrategy: "aggressive" });
 
 // Create observable
 const observable = rxNostr.use(rxReq).pipe(
