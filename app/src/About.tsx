@@ -96,7 +96,9 @@ const App: Component = () => {
             リプライ (元投稿主)
           </div>
           <div class={styles.gridItem}>未実装</div>
-          <div class={styles.gridItem}>もの画像リストから削除</div>
+          <div class={styles.gridItem}>
+            もの画像リストから削除。管理者に加えて、対象画像の作者（同一pubkey）からの削除を受け付けています。
+          </div>
 
           {/* p (point) コマンド */}
           <div class={styles.gridItem}>p [number] [comment]</div>
