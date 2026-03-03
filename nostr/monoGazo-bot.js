@@ -16,6 +16,14 @@ import { exec } from "child_process";
 import { readFile, writeFile } from "fs/promises";
 import { verifier, seckeySigner } from "rx-nostr-crypto";
 
+// 接続できないリレーがあってもクラッシュしないようにする
+process.on("uncaughtException", (err) => {
+  console.error("uncaughtException (継続):", err.message);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("unhandledRejection (継続):", reason);
+});
+
 const nsec = process.env.NSEC_HEX;
 const npub_hex = process.env.PUBHEX_HEX;
 const accessToken = process.env.TOKEN;
@@ -54,7 +62,7 @@ const rxNostr = createRxNostr({
   signer: seckeySigner(nsec),
 });
 rxNostr.setDefaultRelays([
-  "wss://relay-jp.nostr.wirednet.jp",
+  "wss://yabu.me", //"wss://relay-jp.nostr.wirednet.jp",
   "wss://x.kojira.io",
 ]); //, "wss://relay-jp.nostr.wirednet.jp","wss://yabu.me",
 
@@ -64,7 +72,7 @@ const rxReq = createRxForwardReq({ connectionStrategy: "aggressive" });
 const observable = rxNostr.use(rxReq).pipe(
   // Verify event hash and signature
   // Uniq by event hash
-  uniq()
+  uniq(),
 );
 
 //リレーの接続監視、エラーだったら10分待って再接続する
@@ -74,7 +82,7 @@ rxNostr
     //when an error pachet is received
     filter((packet) => packet.state === "error"),
     //wait one minute
-    delay(60 * 10000)
+    delay(60 * 10000),
   )
   .subscribe((packet) => {
     rxNostr.reconnect(packet.from);
@@ -114,7 +122,7 @@ const postEvent = async (kind, content, tags, created_at) => {
       .subscribe({
         next: (packet) => {
           console.log(
-            `relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`
+            `relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`,
           );
         },
         error: (error) => {
@@ -159,13 +167,13 @@ const postRepEvent = async (event, content, tags) => {
         pubkey: npub_hex,
         created_at: Math.max(
           event.created_at + 1,
-          Math.floor(Date.now() / 1000)
+          Math.floor(Date.now() / 1000),
         ), //, { seckey: nsec, relays: writeRelays() }
       })
       .subscribe({
         next: (packet) => {
           console.log(
-            `relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`
+            `relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`,
           );
         },
         error: (error) => {
@@ -212,7 +220,7 @@ const subscription = observable.subscribe(async (packet) => {
               date: date,
               note: noteID,
             },
-            null
+            null,
           );
         } else {
           // 複数画像の場合は選択を求める
@@ -223,7 +231,7 @@ const subscription = observable.subscribe(async (packet) => {
             receivedEvent,
             noteID,
             author,
-            date
+            date,
           );
         }
       })
@@ -291,7 +299,7 @@ const weightedRandomIndex = (length) => {
   // インデックスの重みを一定の比率で増加させる
 
   const weights = Array.from({ length }, (_, i) =>
-    Math.pow(weightRatio, i / (length - 1))
+    Math.pow(weightRatio, i / (length - 1)),
   );
   const totalWeight = weights.reduce((acc, weight) => acc + weight, 0);
   const randomWeight = Math.random() * totalWeight;
@@ -302,7 +310,7 @@ const weightedRandomIndex = (length) => {
   }, []);
 
   return cumulativeWeights.findIndex(
-    (cumulativeWeight) => randomWeight < cumulativeWeight
+    (cumulativeWeight) => randomWeight < cumulativeWeight,
   );
 };
 
@@ -344,10 +352,10 @@ async function gitPush(event, newData) {
         postEvent(
           1,
           `追加:don:\n#もの画像\n${newData.url}\n作: nostr:${newData.author} (${newData.date})`,
-          tags
+          tags,
         );
       }
-    }
+    },
   );
 }
 
@@ -366,7 +374,7 @@ const rep_monoGazo = (event, urlIndex) => {
         ? " (" + monoGazoList[urlIndex].memo + ")"
         : ""
     }  \n(index:${urlIndex})`,
-    tags
+    tags,
   );
 };
 
@@ -388,7 +396,7 @@ const res_arufofo_profile_change = (event, regex) => {
         : ""
     } (${monoGazoList[urlIndex].date})`,
     [["r", monoGazoList[urlIndex].url]],
-    Math.max(event.created_at + 1, Math.floor(Date.now() / 1000))
+    Math.max(event.created_at + 1, Math.floor(Date.now() / 1000)),
   );
 };
 const res_naifofo = (event, regex) => {
@@ -405,7 +413,7 @@ const res_naifofo = (event, regex) => {
   postRepEvent(
     event,
     `あるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像`,
-    tags
+    tags,
   );
 };
 
@@ -422,7 +430,7 @@ const res_monoSite_doko = (event, regex) => {
   postRepEvent(
     event,
     `₍ ･ᴗ･ ₎っ https://tsukemonogit.github.io/nostr-monoGazo-bot/`,
-    tags
+    tags,
   );
 };
 const res_monoPoint = async (event, regex) => {
@@ -463,7 +471,7 @@ const res_monoPoint = async (event, regex) => {
             return;
           }
           console.log(`stdout: ${stdout}`);
-        }
+        },
       );
 
       const tags = [
@@ -524,7 +532,7 @@ const res_monoGazo = (event, regex) => {
               ? " (" + monoGazoList[urlIndex].memo + ")"
               : ""
           } \nnostr:${monoGazoList[urlIndex].nostr.post_id}`,
-          tags
+          tags,
         );
       } else if (monoGazoList[urlIndex].atp) {
         postRepEvent(
@@ -538,7 +546,7 @@ const res_monoGazo = (event, regex) => {
               ? " (" + monoGazoList[urlIndex].memo + ")"
               : ""
           }`,
-          tags
+          tags,
         );
       }
     } catch (error) {
@@ -567,7 +575,7 @@ const res_arufofo_kure = (event, regex) => {
   postRepEvent(
     event,
     `あるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像`,
-    tags
+    tags,
   );
 };
 const res_arufofo_agete = (event, regex) => {
@@ -594,7 +602,7 @@ const res_arufofo_agete = (event, regex) => {
   postEvent(
     event.kind,
     `あるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像`,
-    tags
+    tags,
   );
 };
 const res_arufofo_douzo = (event, regex) => {
@@ -637,10 +645,10 @@ const res_arufofo_douzo = (event, regex) => {
   postEvent(
     event.kind,
     `nostr:${npub_reply} あちらのお客様からです\nあるんふぉふぉどうぞ\nhttps://cdn.nostr.build/i/84d43ed2d18e72aa9c012226628962c815d39c63374b446f7661850df75a7444.png\n作: nostr:npub1e4qg56wvd3ehegd8dm7rlgj8cm998myq0ah8e9t5zeqkg7t7s93q750p76\n#もの画像\nnostr:${nip19.noteEncode(
-      event.id
+      event.id,
     )}`,
     tags,
-    Math.max(event.created_at + 1, Math.floor(Date.now() / 1000))
+    Math.max(event.created_at + 1, Math.floor(Date.now() / 1000)),
   );
 };
 
@@ -721,7 +729,7 @@ async function addMonogazoList(newData, event) {
     // JSONファイルに書き込み
     await writeFile(
       `${scriptPath}/imageList.json`,
-      JSON.stringify(monoGazoList, null, 2)
+      JSON.stringify(monoGazoList, null, 2),
     );
 
     try {
@@ -772,7 +780,7 @@ const res_monoGazo_delete = async (event, regex) => {
         monoGazoList.sort((a, b) => new Date(a.date) - new Date(b.date));
         await writeFile(
           `${scriptPath}/imageList.json`,
-          JSON.stringify(monoGazoList, null, 2)
+          JSON.stringify(monoGazoList, null, 2),
         );
         try {
           await gitPush(event);
@@ -869,7 +877,7 @@ const res_image_selection = async (event, regex) => {
     postRepEvent(
       event,
       `無効な番号です。1から${imageUrls.length}の間で選択してください。`,
-      []
+      [],
     );
     return;
   }
@@ -885,7 +893,7 @@ const res_image_selection = async (event, regex) => {
         date: date,
         note: noteID,
       },
-      event
+      event,
     );
 
     // 選択データを削除
@@ -894,7 +902,7 @@ const res_image_selection = async (event, regex) => {
     postRepEvent(
       event,
       `画像${selectedIndex + 1}を選択しました：\n${selectedUrl}`,
-      []
+      [],
     );
   } catch (error) {
     console.error("画像追加エラー:", error);
@@ -953,7 +961,7 @@ function getMonogazoEvent(event) {
   const eventID = lastTag[1];
   // すでに同じIDの画像が存在するかチェック（参照先イベントIDで）
   const isDuplicate = monoGazoList.some(
-    (item) => item.note === nip19.noteEncode(eventID)
+    (item) => item.note === nip19.noteEncode(eventID),
   );
   if (isDuplicate) {
     return Promise.reject(new Error("既に追加済みのイベントです"));
@@ -1040,7 +1048,7 @@ async function postImageSelectionRequest(
   originalEvent,
   noteID,
   author,
-  date
+  date,
 ) {
   let content = `複数の画像が見つかりました。どれをmonogazoに追加しますか？\n`;
   content += `作: nostr:${author} (${date})\n\n`;
@@ -1076,14 +1084,17 @@ async function postImageSelectionRequest(
 }
 
 // 選択データのクリーンアップ（30分後に自動削除）
-setInterval(() => {
-  const now = Date.now();
-  const EXPIRY_TIME = 30 * 60 * 1000; // 30分
+setInterval(
+  () => {
+    const now = Date.now();
+    const EXPIRY_TIME = 30 * 60 * 1000; // 30分
 
-  for (const [eventId, data] of pendingImageSelections.entries()) {
-    if (now - data.timestamp > EXPIRY_TIME) {
-      console.log(`期限切れの選択データを削除: ${eventId}`);
-      pendingImageSelections.delete(eventId);
+    for (const [eventId, data] of pendingImageSelections.entries()) {
+      if (now - data.timestamp > EXPIRY_TIME) {
+        console.log(`期限切れの選択データを削除: ${eventId}`);
+        pendingImageSelections.delete(eventId);
+      }
     }
-  }
-}, 5 * 60 * 1000); // 5分ごとにクリーンアップ
+  },
+  5 * 60 * 1000,
+); // 5分ごとにクリーンアップ
