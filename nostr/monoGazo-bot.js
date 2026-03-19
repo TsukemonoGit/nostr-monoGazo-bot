@@ -31,14 +31,13 @@ const scriptPath = process.env.SCRIPTPATH;
 
 const GIT_AUTHOR_NAME = process.env.GIT_AUTHOR_NAME;
 const GIT_AUTHOR_EMAIL = process.env.GIT_AUTHOR_EMAIL;
-const IMAGE_SELECTION_CHANNEL = process.env.IMAGE_SELECTION_CHANNEL;
+
 
 const owners = JSON.parse(process.env.ORNERS_HEX.replace(/'/g, '"'));
 const point_user = process.env.POINTUSER_PUB_HEX;
 const monoGazoList = JSON.parse(await readFile(`${scriptPath}/imageList.json`)); //JSONで読み込む方
 
 //addmonogazo
-const bookmarkTag = "monogazo";
 // 画像選択待ちのマップ（イベントIDをキーとして保存）
 const pendingImageSelections = new Map();
 
@@ -187,58 +186,6 @@ const postRepEvent = async (event, content, tags) => {
 
 // Start subscription
 const subscription = observable.subscribe(async (packet) => {
-  if (packet.event.kind === 30003) {
-    if (packet.event.created_at < Date.now() / 1000 - 10 * 60) {
-      return; //昔のイベントは無視
-    }
-    console.log(packet);
-    getMonogazoEvent(packet.event)
-      .then(async (receivedEvent) => {
-        console.log("イベント取得完了:", receivedEvent);
-
-        // 複数画像URLを取得
-        const imageUrls = getUrls(receivedEvent.content);
-
-        if (imageUrls.length === 0) {
-          console.log("画像URLが見つかりません");
-          return;
-        }
-
-        // 日時を整形
-        const date = formatDate(receivedEvent.created_at);
-        const noteID = nip19.noteEncode(receivedEvent.id);
-        const author = nip19.npubEncode(receivedEvent.pubkey);
-
-        if (imageUrls.length === 1) {
-          // 単一画像の場合は従来通り自動追加
-          console.log("単一画像:", imageUrls[0], date, noteID, author);
-
-          addMonogazoList(
-            {
-              url: imageUrls[0],
-              author: author,
-              date: date,
-              note: noteID,
-            },
-            null,
-          );
-        } else {
-          // 複数画像の場合は選択を求める
-          console.log("複数画像検出:", imageUrls.length, "枚");
-
-          await postImageSelectionRequest(
-            imageUrls,
-            receivedEvent,
-            noteID,
-            author,
-            date,
-          );
-        }
-      })
-      .catch((error) => {
-        console.error("処理エラー:", error);
-      });
-  }
   // Your minimal application!
   if (packet.event.pubkey === npub_hex) {
     return;
@@ -282,17 +229,7 @@ const subscription = observable.subscribe(async (packet) => {
 });
 
 // Send REQ message to listen kind1 events
-//もの画像に追加したいイベントが特定のブックマークフォルダに追加されたときに自動でもの画像に追加するための購読フィルターを追加
-rxReq.emit([
-  { kinds: [1, 42], since: now },
-  {
-    kinds: [30003],
-    authors: [
-      "84b0c46ab699ac35eb2ca286470b85e081db2087cdef63932236c397417782f5",
-    ],
-    "#d": [bookmarkTag],
-  },
-]);
+rxReq.emit({ kinds: [1, 42], since: now });
 
 const weightRatio = 1.5; // 最後のインデックスが最初のインデックスの2倍の確率で選ばれるようにする
 const weightedRandomIndex = (length) => {
@@ -653,25 +590,95 @@ const res_arufofo_douzo = (event, regex) => {
 };
 
 const res_monoGazo_add = async (event, regex) => {
-  //権限チェック
-  if (owners.includes(event.pubkey)) {
-    const match = event.content.trim().match(regex);
-    if (match === null) {
-      throw new Error("正規表現にマッチしません");
+  // 権限チェック
+  if (!owners.includes(event.pubkey)) {
+    return;
+  }
+
+  const match = event.content.trim().match(regex);
+  if (match === null) {
+    throw new Error("正規表現にマッチしません");
+  }
+
+  const rawIdentifier = match.groups.identifier;
+  const imageNum = match.groups.imageNum
+    ? parseInt(match.groups.imageNum)
+    : null;
+
+  // nostr: プレフィックスを除去
+  const identifier = rawIdentifier.replace(/^nostr:/, "");
+  console.log("add identifier:", identifier, "imageNum:", imageNum);
+
+  try {
+    // nevent/note をデコード
+    const decoded = nip19.decode(identifier);
+    let eventId;
+
+    if (decoded.type === "nevent") {
+      eventId = decoded.data.id;
+    } else if (decoded.type === "note") {
+      eventId = decoded.data;
+    } else {
+      postRepEvent(event, "nevent または note を指定してください ₍ xᴗx ₎", []);
+      return;
     }
-    const data = match.groups.jsonData; // 名前付きキャプチャグループを使用
-    console.log(data);
-    if (data !== undefined) {
-      try {
-        const newData = JSON.parse(data);
-        await addMonogazoList(newData, event);
-      } catch (error) {
-        console.error("JSON parse error:", error);
-        console.error("JSON string:", data);
-        if (event)
-          postRepEvent(event, "JSONの形式が正しくありません ₍ xᴗx ₎", []);
+
+    // イベントを取得
+    const receivedEvent = await getEventById(eventId);
+    console.log("イベント取得完了:", receivedEvent.id);
+
+    // 画像URLを抽出
+    const imageUrls = getUrls(receivedEvent.content);
+    if (imageUrls.length === 0) {
+      postRepEvent(event, "画像URLが見つかりません ₍ xᴗx ₎", []);
+      return;
+    }
+
+    // 日時・author・noteID を生成
+    const date = formatDate(receivedEvent.created_at);
+    const noteID = nip19.noteEncode(receivedEvent.id);
+    const author = nip19.npubEncode(receivedEvent.pubkey);
+
+    if (imageNum !== null) {
+      // 番号指定あり
+      const idx = imageNum - 1; // 1-indexed → 0-indexed
+      if (idx < 0 || idx >= imageUrls.length) {
+        postRepEvent(
+          event,
+          `無効な番号です。1から${imageUrls.length}の間で指定してください。`,
+          [],
+        );
+        return;
       }
+      await addMonogazoList(
+        { url: imageUrls[idx], author, date, note: noteID },
+        event,
+      );
+    } else if (imageUrls.length === 1) {
+      // 単一画像 → 自動追加
+      await addMonogazoList(
+        { url: imageUrls[0], author, date, note: noteID },
+        event,
+      );
+    } else {
+      // 複数画像 → 選択を求める
+      console.log("複数画像検出:", imageUrls.length, "枚");
+      await postImageSelectionRequest(
+        imageUrls,
+        receivedEvent,
+        noteID,
+        author,
+        date,
+        event,
+      );
     }
+  } catch (error) {
+    console.error("add処理エラー:", error);
+    postRepEvent(
+      event,
+      `処理に失敗しました ₍ xᴗx ₎\n${error.message || error}`,
+      [],
+    );
   }
 };
 
@@ -838,7 +845,7 @@ export const res_randomHoukou = async (event, regex) => {
 };
 //[RegExp, (event: NostrEvent, mode: Mode, regstr: RegExp) => [string, string[][]] | null][]
 
-// 画像選択処理の関数
+// 画像選択処理の関数（addコマンドで複数画像の場合にリプライで番号を受け付ける）
 const res_image_selection = async (event, regex) => {
   // 権限チェック
   if (!owners.includes(event.pubkey)) {
@@ -852,17 +859,26 @@ const res_image_selection = async (event, regex) => {
 
   const selectedIndex = parseInt(match[1]) - 1;
 
-  // このリプライが画像選択に対するものかをチェック
-  // リプライ先のイベントから選択データを探す
+  // リプライ先のイベントIDから選択データを探す
+  const replyToId = event.tags?.find(
+    (tag) => tag[0] === "e" && pendingImageSelections.has(tag[1]),
+  )?.[1];
+
+  // リプライ先で見つからない場合は最新の選択データを使用
   let selectionData = null;
   let selectionKey = null;
 
-  for (const [key, data] of pendingImageSelections.entries()) {
-    // 時間的に近い選択要求かどうかをチェック（5分以内）
-    if (Date.now() - data.timestamp < 5 * 60 * 1000) {
-      selectionData = data;
-      selectionKey = key;
-      break;
+  if (replyToId && pendingImageSelections.has(replyToId)) {
+    selectionKey = replyToId;
+    selectionData = pendingImageSelections.get(replyToId);
+  } else {
+    // 時間的に近い選択要求を探す（5分以内）
+    for (const [key, data] of pendingImageSelections.entries()) {
+      if (Date.now() - data.timestamp < 5 * 60 * 1000) {
+        selectionData = data;
+        selectionKey = key;
+        break;
+      }
     }
   }
 
@@ -870,7 +886,7 @@ const res_image_selection = async (event, regex) => {
     return; // 該当する選択要求が見つからない
   }
 
-  const { imageUrls, originalEvent, noteID, author, date } = selectionData;
+  const { imageUrls, noteID, author, date } = selectionData;
 
   // 選択されたインデックスが有効かチェック
   if (selectedIndex < 0 || selectedIndex >= imageUrls.length) {
@@ -898,12 +914,6 @@ const res_image_selection = async (event, regex) => {
 
     // 選択データを削除
     pendingImageSelections.delete(selectionKey);
-
-    postRepEvent(
-      event,
-      `画像${selectedIndex + 1}を選択しました：\n${selectedUrl}`,
-      [],
-    );
   } catch (error) {
     console.error("画像追加エラー:", error);
     postRepEvent(event, "画像の追加に失敗しました ₍ xᴗx ₎", []);
@@ -937,7 +947,10 @@ const resmapReply = [
     /(npub\w{59})\s?(さん|ちゃん|くん)?に(.*)(あるんふぉふぉ|あるふぉふぉ)(.*)(を送って|をおくって|送って|おくって|あげて)/,
     res_arufofo_douzo,
   ],
-  [/^(追加|add)\s+(?<jsonData>{.+})$/s, res_monoGazo_add],
+  [
+    /^(追加|add)\s+(?<identifier>(?:nostr:)?(?:nevent1|note1)\S+)(?:\s+(?<imageNum>\d+))?$/i,
+    res_monoGazo_add,
+  ],
   [/^(削除|delete)\s*(\d+)*/i, res_monoGazo_delete],
 
   [/^(\d+)$/, res_image_selection],
@@ -946,30 +959,6 @@ const resmapReply = [
 ];
 
 //-------------------------------
-
-function getMonogazoEvent(event) {
-  // タグの最後の要素をチェック
-  if (event.tags.find((tag) => tag[0] === "d")?.[1] !== bookmarkTag) {
-    return Promise.reject(new Error("対象外のタグです"));
-  }
-
-  const lastTag = event.tags.at(-1); // 最後の要素
-  if (lastTag[0] !== "e" || lastTag.length < 2) {
-    return Promise.reject(new Error("適切なeタグが見つかりません"));
-  }
-
-  const eventID = lastTag[1];
-  // すでに同じIDの画像が存在するかチェック（参照先イベントIDで）
-  const isDuplicate = monoGazoList.some(
-    (item) => item.note === nip19.noteEncode(eventID),
-  );
-  if (isDuplicate) {
-    return Promise.reject(new Error("既に追加済みのイベントです"));
-  }
-
-  // イベント取得処理をPromiseで返す
-  return getEventById(eventID);
-}
 
 // rxNostrを使ったイベント取得をPromise化する関数
 function getEventById(eventId) {
@@ -1036,12 +1025,13 @@ function formatDate(timestamp) {
 }
 
 /**
- * 複数画像が投稿された場合に、どれを追加するか選択するメッセージを送信
+ * 複数画像が投稿された場合に、どれを追加するか選択するメッセージをリプライで送信
  * @param {Array<string>} imageUrls - 取得した画像URLの配列
  * @param {Object} originalEvent - 元のNostrイベント
  * @param {string} noteID - noteID
  * @param {string} author - 投稿者
  * @param {string} date - 日付
+ * @param {Object} triggerEvent - addコマンドを送信したイベント
  */
 async function postImageSelectionRequest(
   imageUrls,
@@ -1049,6 +1039,7 @@ async function postImageSelectionRequest(
   noteID,
   author,
   date,
+  triggerEvent,
 ) {
   let content = `複数の画像が見つかりました。どれをmonogazoに追加しますか？\n`;
   content += `作: nostr:${author} (${date})\n\n`;
@@ -1057,30 +1048,23 @@ async function postImageSelectionRequest(
     content += `${index + 1}. ${url}\n`;
   });
   content += `\n数字でリプライしてください（1-${imageUrls.length}）`;
+  content += `\nまたは \`add nostr:${noteID} 番号\` で指定もできます`;
 
-  // 選択用タグを作成
-  const tags = [
-    ["e", IMAGE_SELECTION_CHANNEL, "", "root"],
+  // リプライとして送信し、そのイベントIDを選択データのキーとする
+  // まずリプライを送信
+  postRepEvent(triggerEvent, content, [
     ["t", "もの画像選択"],
     ...imageUrls.map((url) => ["r", url]),
-  ];
+  ]);
 
-  // 選択用データを保存して、後でリプライから選択できるようにする
-  const timestamp = Math.floor(Date.now() / 1000);
-  const selectionId = `selection_${timestamp}_${Math.random()
-    .toString(36)
-    .substring(2, 9)}`;
-  pendingImageSelections.set(selectionId, {
+  // 選択用データを保存（triggerEvent.id をキーとする）
+  pendingImageSelections.set(triggerEvent.id, {
     imageUrls,
-    originalEvent,
     noteID,
     author,
     date,
     timestamp: Date.now(),
   });
-
-  // 投稿
-  postEvent(42, content, tags);
 }
 
 // 選択データのクリーンアップ（30分後に自動削除）

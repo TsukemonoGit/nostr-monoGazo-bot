@@ -96,6 +96,7 @@ type Event struct {
 	rkey   string
 	text   string
 	images []*bsky.EmbedImages_Image
+	reply  *bsky.FeedPost_ReplyRef
 }
 
 func init() {
@@ -159,11 +160,6 @@ func dataFilePath() (string, error) {
 	}
 	dir := filepath.Dir(exePath)
 	return filepath.Join(dir, "data", "imageList.json"), nil
-}
-
-// imageList.json 読み込み（GitHub取得に変更）
-func readImageList() error {
-	return fetchImageList()
 }
 
 // imageList.json 書き込み
@@ -290,6 +286,22 @@ func (bot *Bot) isSelfPost(did string) bool {
 	return did == botDID
 }
 
+// ボットに対するリプライかどうかを判定
+func (bot *Bot) isReplyToBot(reply *bsky.FeedPost_ReplyRef) bool {
+	if reply == nil || reply.Parent == nil || reply.Parent.Uri == "" {
+		return false
+	}
+	// 親投稿のURIからDIDを抽出
+	// URI形式: at://did:plc:xxx/app.bsky.feed.post/rkey
+	trimUri := strings.TrimPrefix(reply.Parent.Uri, "at://")
+	parts := strings.Split(trimUri, "/")
+	if len(parts) == 0 || parts[0] == "" {
+		return false
+	}
+	parentDID := parts[0]
+	return parentDID == botDID
+}
+
 func getMimeType(u string) string {
 	parts := strings.Split(u, ".")
 	ext := strings.ToLower(parts[len(parts)-1])
@@ -403,25 +415,140 @@ func (bot *Bot) analyze(ev Event) error {
 		return nil
 	}
 
-	// 正規表現
+	// ボットに対するリプライかどうかを判定
+	isReplyToBot := bot.isReplyToBot(ev.reply)
+
+	// 正規表現（共通）
 	var re struct {
-		random, naifofo, doko, siteDoko, vs, number, wareki, length, arufofoKure, arufofoAgete, add, addCmd, deleteCmd *regexp.Regexp
+		random, naifofo, doko, siteDoko, vs, number, length, arufofoKure, arufofoAgete *regexp.Regexp
+		// ボットリプライ専用
+		wareki, add, addCmd, deleteCmd *regexp.Regexp
 	}
+
+	// 共通コマンド（リプライでも一般投稿でも反応）
 	re.random = regexp.MustCompile("^(もの|mono)画像$")
 	re.naifofo = regexp.MustCompile("(ない)ん?ふぉふぉ")
-	re.doko = regexp.MustCompile("(もの|mono)画像\\s?どこ[?？]?$")
-	re.siteDoko = regexp.MustCompile("(もの|mono)(画像)?サイト\\s?どこ[?？]?$")
+	re.doko = regexp.MustCompile("^(もの|mono)画像\\s?どこ[?？]?$")
+	re.siteDoko = regexp.MustCompile("^(もの|mono)(画像)?サイト\\s?どこ[?？]?$")
 	re.vs = regexp.MustCompile("^もの、(.{1,50}(?:vs.{1,50})+)して$")
-	re.number = regexp.MustCompile("(もの|mono)画像\\s?(\\d+)$")
-	re.wareki = regexp.MustCompile("和暦")
-	re.length = regexp.MustCompile("(もの|mono)画像\\s?(length|長さ|枚数|何枚)")
-	re.arufofoKure = regexp.MustCompile("(あるん|ある)ふぉふぉ?(下さい|ください|頂戴|ちょうだい).?")
-	re.arufofoAgete = regexp.MustCompile("(あるん|ある)ふぉふぉ?(あげて).?")
-	re.add = regexp.MustCompile("^もの画像追加$")
-	re.addCmd = regexp.MustCompile("(追加|add)(\\s.*)({.*})")
-	re.deleteCmd = regexp.MustCompile("(削除|delete)\\s*(\\d+)*")
+	re.number = regexp.MustCompile("^(もの|mono)画像\\s?(\\d+)$")
+	re.length = regexp.MustCompile("^(もの|mono)画像\\s?(length|長さ|枚数|何枚)")
+	re.arufofoKure = regexp.MustCompile("^(あるん|ある)ふぉふぉ?(下さい|ください|頂戴|ちょうだい).?")
+	re.arufofoAgete = regexp.MustCompile("^(あるん|ある)ふぉふぉ?(あげて).?")
 
-	// コマンド処理のswitch文
+	// ボットリプライ専用コマンド
+	re.wareki = regexp.MustCompile("^和暦$")
+	re.add = regexp.MustCompile("^もの画像追加$")
+	re.addCmd = regexp.MustCompile("^(追加|add)(\\s.*)({.*})")
+	re.deleteCmd = regexp.MustCompile("^(削除|delete)\\s*(\\d+)*")
+
+	// ボットリプライ専用コマンドの処理
+	if isReplyToBot {
+		switch {
+		case re.wareki.MatchString(content):
+			return bot.post(schema, did, rkey, warekiNow()+" らしい", nil, nil)
+
+		case re.add.MatchString(content) && bot.isOwner(ev.did):
+			if len(ev.images) == 0 {
+				return bot.post(schema, did, rkey, "画像がありません", nil, nil)
+			}
+			mu.Lock()
+			addedCount := 0
+			for _, img := range ev.images {
+				if img.Image == nil || img.Image.Ref.String() == "" {
+					continue
+				}
+				imageURL := img.Image.Ref.String()
+				found := false
+				for _, item := range imageList {
+					if item.URL == imageURL {
+						found = true
+						break
+					}
+				}
+				if !found {
+					newItem := Item{
+						URL:  imageURL,
+						Date: time.Now().Local().Format("2006/1/2"),
+						Memo: "",
+						Atp:  &AtpItem{Author: ev.did, ID: ev.rkey},
+					}
+					imageList = append(imageList, newItem)
+					addedCount++
+				}
+			}
+			mu.Unlock()
+			if addedCount > 0 {
+				if err := writeImageList(); err != nil {
+					return bot.post(schema, did, rkey, "保存に失敗", nil, nil)
+				}
+				_ = gitPush()
+				return bot.post(schema, did, rkey, fmt.Sprintf("%d枚追加。総数%d", addedCount, len(imageList)), nil, nil)
+			}
+			return bot.post(schema, did, rkey, "新規なし", nil, nil)
+
+		case re.addCmd.MatchString(content) && bot.isOwner(did):
+			matches := re.addCmd.FindStringSubmatch(content)
+			if len(matches) >= 3 {
+				var p addPayload
+				jsonPart := matches[3]
+				if err := json.Unmarshal([]byte(jsonPart), &p); err != nil {
+					return bot.post(schema, did, rkey, "JSONの解析に失敗", nil, nil)
+				}
+				if strings.TrimSpace(p.URL) == "" {
+					return bot.post(schema, did, rkey, "urlが空", nil, nil)
+				}
+				mu.Lock()
+				dup := false
+				for _, it := range imageList {
+					if it.URL == p.URL {
+						dup = true
+						break
+					}
+				}
+				if !dup {
+					newItem := Item{
+						ID:   fmt.Sprintf("atp-%s/%s", did, rkey),
+						URL:  p.URL,
+						Date: p.Date,
+						Memo: p.Memo,
+						Atp:  &AtpItem{Author: p.Atp.Author, ID: p.Atp.ID},
+					}
+					imageList = append(imageList, newItem)
+					sort.Slice(imageList, func(i, j int) bool {
+						return imageList[i].Date < imageList[j].Date
+					})
+				}
+				mu.Unlock()
+				if err := writeImageList(); err != nil {
+					return bot.post(schema, did, rkey, "保存に失敗", nil, nil)
+				}
+				_ = gitPush()
+				return bot.post(schema, did, rkey, "追加完了", nil, nil)
+			}
+
+		case re.deleteCmd.MatchString(content) && bot.isOwner(did):
+			matches := re.deleteCmd.FindStringSubmatch(content)
+			if len(matches) >= 3 && matches[2] != "" {
+				idx, err := strconv.Atoi(matches[2])
+				if err != nil {
+					return bot.post(schema, did, rkey, "番号不正", nil, nil)
+				}
+				mu.Lock()
+				if idx >= 0 && idx < len(imageList) {
+					del := imageList[idx]
+					_ = deleteImage(idx)
+					mu.Unlock()
+					_ = gitPush()
+					return bot.post(schema, did, rkey, fmt.Sprintf("削除:\nURL: %s", del.URL), nil, nil)
+				}
+				mu.Unlock()
+				return bot.post(schema, did, rkey, "番号範囲外", nil, nil)
+			}
+		}
+	}
+
+	// 共通コマンドの処理（リプライでも一般投稿でも反応）
 	switch {
 	case re.length.MatchString(content) || regexp.MustCompile("^もの画像.*数.*$").MatchString(content):
 		mu.Lock()
@@ -473,107 +600,6 @@ func (bot *Bot) analyze(ev Event) error {
 			mu.Unlock()
 			return bot.post(schema, did, rkey, "番号範囲外", nil, nil)
 		}
-
-	case re.addCmd.MatchString(content) && bot.isOwner(did):
-		matches := re.addCmd.FindStringSubmatch(content)
-		if len(matches) >= 3 {
-			var p addPayload
-			jsonPart := matches[3]
-			if err := json.Unmarshal([]byte(jsonPart), &p); err != nil {
-				return bot.post(schema, did, rkey, "JSONの解析に失敗", nil, nil)
-			}
-			if strings.TrimSpace(p.URL) == "" {
-				return bot.post(schema, did, rkey, "urlが空", nil, nil)
-			}
-			mu.Lock()
-			dup := false
-			for _, it := range imageList {
-				if it.URL == p.URL {
-					dup = true
-					break
-				}
-			}
-			if !dup {
-				newItem := Item{
-					ID:   fmt.Sprintf("atp-%s/%s", did, rkey),
-					URL:  p.URL,
-					Date: p.Date,
-					Memo: p.Memo,
-					Atp:  &AtpItem{Author: p.Atp.Author, ID: p.Atp.ID},
-				}
-				imageList = append(imageList, newItem)
-				sort.Slice(imageList, func(i, j int) bool {
-					return imageList[i].Date < imageList[j].Date
-				})
-			}
-			mu.Unlock()
-			if err := writeImageList(); err != nil {
-				return bot.post(schema, did, rkey, "保存に失敗", nil, nil)
-			}
-			_ = gitPush()
-			return bot.post(schema, did, rkey, "追加完了", nil, nil)
-		}
-
-	case re.add.MatchString(content) && bot.isOwner(ev.did):
-		if len(ev.images) == 0 {
-			return bot.post(schema, did, rkey, "画像がありません", nil, nil)
-		}
-		mu.Lock()
-		addedCount := 0
-		for _, img := range ev.images {
-			if img.Image == nil || img.Image.Ref.String() == "" {
-				continue
-			}
-			imageURL := img.Image.Ref.String()
-			found := false
-			for _, item := range imageList {
-				if item.URL == imageURL {
-					found = true
-					break
-				}
-			}
-			if !found {
-				newItem := Item{
-					URL:  imageURL,
-					Date: time.Now().Local().Format("2006/1/2"),
-					Memo: "",
-					Atp:  &AtpItem{Author: ev.did, ID: ev.rkey},
-				}
-				imageList = append(imageList, newItem)
-				addedCount++
-			}
-		}
-		mu.Unlock()
-		if addedCount > 0 {
-			if err := writeImageList(); err != nil {
-				return bot.post(schema, did, rkey, "保存に失敗", nil, nil)
-			}
-			_ = gitPush()
-			return bot.post(schema, did, rkey, fmt.Sprintf("%d枚追加。総数%d", addedCount, len(imageList)), nil, nil)
-		}
-		return bot.post(schema, did, rkey, "新規なし", nil, nil)
-
-	case re.deleteCmd.MatchString(content) && bot.isOwner(did):
-		matches := re.deleteCmd.FindStringSubmatch(content)
-		if len(matches) >= 3 && matches[2] != "" {
-			idx, err := strconv.Atoi(matches[2])
-			if err != nil {
-				return bot.post(schema, did, rkey, "番号不正", nil, nil)
-			}
-			mu.Lock()
-			if idx >= 0 && idx < len(imageList) {
-				del := imageList[idx]
-				_ = deleteImage(idx)
-				mu.Unlock()
-				_ = gitPush()
-				return bot.post(schema, did, rkey, fmt.Sprintf("削除:\nURL: %s", del.URL), nil, nil)
-			}
-			mu.Unlock()
-			return bot.post(schema, did, rkey, "番号範囲外", nil, nil)
-		}
-
-	case re.wareki.MatchString(content):
-		return bot.post(schema, did, rkey, warekiNow()+" らしい", nil, nil)
 
 	case re.doko.MatchString(content):
 		return bot.post(schema, did, rkey, "₍ ･ᴗ･ ₎ﾖﾝﾀﾞ?", nil, nil)
@@ -829,12 +855,14 @@ func run() error {
 					if post.Embed != nil && post.Embed.EmbedImages != nil {
 						images = post.Embed.EmbedImages.Images
 					}
+					// 修正: reply を渡す
 					q <- Event{
 						schema: parts[0],
 						did:    evt.Repo,
 						rkey:   parts[1],
 						text:   post.Text,
 						images: images,
+						reply:  post.Reply,
 					}
 				}
 			}
