@@ -12,7 +12,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@pandacss/dev": "^0.54.0",
+    "@pandacss/dev": "^1.11.1",
     "@types/node": "^22.16.4",
     "solid-devtools": "^0.34.3",
     "typescript": "^5.8.3",
