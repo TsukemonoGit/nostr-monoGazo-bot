@@ -16,12 +16,22 @@ import { exec } from "child_process";
 import { readFile, writeFile } from "fs/promises";
 import { verifier, seckeySigner } from "rx-nostr-crypto";
 
+const log = (...args) => {
+  const timestamp = new Date().toISOString().replace("T", " ").replace("Z", "");
+  console.log(`[${timestamp}]`, ...args);
+};
+
+const error = (...args) => {
+  const timestamp = new Date().toISOString().replace("T", " ").replace("Z", "");
+  console.error(`[${timestamp}]`, ...args);
+};
+
 // 接続できないリレーがあってもクラッシュしないようにする
 process.on("uncaughtException", (err) => {
-  console.error("uncaughtException (継続):", err.message);
+  error("uncaughtException (継続):", err.message);
 });
 process.on("unhandledRejection", (reason) => {
-  console.error("unhandledRejection (継続):", reason);
+  error("unhandledRejection (継続):", reason);
 });
 
 const nsec = process.env.NSEC_HEX;
@@ -31,7 +41,6 @@ const scriptPath = process.env.SCRIPTPATH;
 
 const GIT_AUTHOR_NAME = process.env.GIT_AUTHOR_NAME;
 const GIT_AUTHOR_EMAIL = process.env.GIT_AUTHOR_EMAIL;
-
 
 const owners = JSON.parse(process.env.ORNERS_HEX.replace(/'/g, '"'));
 const point_user = process.env.POINTUSER_PUB_HEX;
@@ -90,7 +99,7 @@ rxNostr
 //書き込む前に書き込めるリレーを確認してみる
 const writeRelays = () => {
   const allRelayStatus = rxNostr.getAllRelayStatus(); // 連想配列を取得
-  //console.log(allRelayStatus);
+  //log(allRelayStatus);
   //connected以外があるときだけ一次リレー設定しようかと思ったけどとりあえず
   // const hasDisconnectedRelay = Object.values(allRelayStatus).some(
   //   relay => relay.status !== "connected"
@@ -102,9 +111,9 @@ const writeRelays = () => {
       return arr;
     }, []);
   if (connectedRelaysArray.length < 1) {
-    console.log("書込み可能なリレーがないかも");
+    log("書込み可能なリレーがないかも");
   }
-  //console.log(connectedRelaysArray);
+  //log(connectedRelaysArray);
   return connectedRelaysArray;
 };
 const postEvent = async (kind, content, tags, created_at) => {
@@ -120,16 +129,14 @@ const postEvent = async (kind, content, tags, created_at) => {
       }) //, { seckey: nsec, relays: writeRelays() }
       .subscribe({
         next: (packet) => {
-          console.log(
-            `relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`,
-          );
+          log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
         },
         error: (error) => {
-          console.log("Error");
+          log("Error");
         },
       });
   } catch (error) {
-    console.log(error);
+    log(error);
   }
 };
 
@@ -171,16 +178,14 @@ const postRepEvent = async (event, content, tags) => {
       })
       .subscribe({
         next: (packet) => {
-          console.log(
-            `relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`,
-          );
+          log(`relay: ${packet.from} -> ${packet.ok ? "succeeded" : "failed"}`);
         },
         error: (error) => {
-          console.log("Error");
+          log("Error");
         },
       });
   } catch (error) {
-    console.log(error);
+    log(error);
   }
 };
 
@@ -190,7 +195,7 @@ const subscription = observable.subscribe(async (packet) => {
   if (packet.event.pubkey === npub_hex) {
     return;
   }
-  // console.log(packet);
+  // log(packet);
   const content = packet.event.content.trim();
 
   //誰へのリプでもない場合
@@ -204,7 +209,7 @@ const subscription = observable.subscribe(async (packet) => {
         try {
           func(packet.event, regex); // マッチした場合に関数を実行
         } catch (error) {
-          console.log(error);
+          log(error);
         }
         break; // 1つでもマッチしたらループを抜ける
       }
@@ -220,7 +225,7 @@ const subscription = observable.subscribe(async (packet) => {
         try {
           func(packet.event, regex); // マッチした場合に関数を実行
         } catch (error) {
-          console.log(error);
+          log(error);
         }
         break; // 1つでもマッチしたらループを抜ける
       }
@@ -258,13 +263,13 @@ async function gitPush(event, newData) {
   // const currentDate = new Date().toISOString().slice(0, 10);
 
   // git コマンドを同期的に実行
-  console.log(`cd ${scriptPath}`);
+  log(`cd ${scriptPath}`);
 
   exec(
     `cd ${scriptPath} && git remote set-url origin https://${accessToken}@github.com/TsukemonoGit/nostr-monoGazo-bot.git &&  git pull origin main && git add . &&git -c user.name='${GIT_AUTHOR_NAME}' -c user.email='${GIT_AUTHOR_EMAIL}' commit -m "Update imageList.json" &&  git push -u origin main`,
     (err, stdout, stderr) => {
       if (err) {
-        console.log(`stderr: ${stderr}`);
+        log(`stderr: ${stderr}`);
         if (event) {
           postRepEvent(event, "₍ ･ᴗx ₎", []);
         } else {
@@ -272,7 +277,7 @@ async function gitPush(event, newData) {
         }
         return;
       }
-      console.log(`stdout: ${stdout}`);
+      log(`stdout: ${stdout}`);
       if (event) {
         postRepEvent(event, "₍ ･ᴗ･ ₎", []);
       }
@@ -317,7 +322,7 @@ const rep_monoGazo = (event, urlIndex) => {
 
 //normal
 const res_arufofo_profile_change = (event, regex) => {
-  console.log("あいこん変更");
+  log("あいこん変更");
 
   const urlIndex = weightedRandomIndex(monoGazoList.length); //Math.floor(Math.random() * monoGazoList.length);
   metadata.picture = monoGazoList[urlIndex].url;
@@ -337,7 +342,7 @@ const res_arufofo_profile_change = (event, regex) => {
   );
 };
 const res_naifofo = (event, regex) => {
-  console.log("ないんふぉふぉ");
+  log("ないんふぉふぉ");
 
   const tags = [
     [
@@ -355,7 +360,7 @@ const res_naifofo = (event, regex) => {
 };
 
 const res_monoGazo_random = (event, regex) => {
-  console.log("もの画像");
+  log("もの画像");
   const urlIndex = weightedRandomIndex(monoGazoList.length); //Math.floor(Math.random() * monoGazoList.length);
   rep_monoGazo(event, urlIndex);
 };
@@ -404,10 +409,10 @@ const res_monoPoint = async (event, regex) => {
         }  && node append.js '${JSON.stringify([pushData])}'`,
         (err, stdout, stderr) => {
           if (err) {
-            console.log(`stderr: ${stderr}`);
+            log(`stderr: ${stderr}`);
             return;
           }
-          console.log(`stdout: ${stdout}`);
+          log(`stdout: ${stdout}`);
         },
       );
 
@@ -416,24 +421,24 @@ const res_monoPoint = async (event, regex) => {
         ["p", event.pubkey],
         ["k", event.kind.toString()],
       ];
-      //console.log(tags);
+      //log(tags);
       postEvent(7, "+", tags);
     } catch (error) {
-      console.log(error);
+      log(error);
       const tags = [
         ["e", event.id],
         ["p", event.pubkey],
         ["k", event.kind.toString()],
       ]; //, ["k", event.kind.toString()]
       postEvent(7, "x", tags);
-      //console.log(tags);
+      //log(tags);
     }
   }
 };
 
 //reply
 const res_wareki = (event, regex) => {
-  console.log("和暦知りたいらしい");
+  log("和暦知りたいらしい");
   const now = new Date();
   const wareki = now.toLocaleString("ja-JP-u-ca-japanese", {
     dateStyle: "long",
@@ -449,7 +454,7 @@ const res_monoGazo = (event, regex) => {
   }
   if (matches[2] !== undefined) {
     //指定された番号 微妙にフォーマットが違うので…
-    console.log("もの画像", matches[2]);
+    log("もの画像", matches[2]);
     //q 付けると元の投稿で引用リスト見た時に大量の投稿が表示されそうなのでqタグはあえて付けないよ
     try {
       const urlIndex = parseInt(matches[2]);
@@ -487,21 +492,21 @@ const res_monoGazo = (event, regex) => {
         );
       }
     } catch (error) {
-      console.log("decode errorかな");
+      log("decode errorかな");
     }
   } else {
     //ランダム
-    console.log("もの画像");
+    log("もの画像");
     const urlIndex = weightedRandomIndex(monoGazoList.length); //Math.floor(Math.random() * monoGazoList.length);
     rep_monoGazo(event, urlIndex);
   }
 };
 const res_monoGazo_len = (event, regex) => {
-  console.log("もの画像の数知りたいらしい");
+  log("もの画像の数知りたいらしい");
   postRepEvent(event, `もの画像は今全部で${monoGazoList.length}枚あるよ`, []);
 };
 const res_arufofo_kure = (event, regex) => {
-  console.log(event.id);
+  log(event.id);
   const tags = [
     [
       "r",
@@ -517,7 +522,7 @@ const res_arufofo_kure = (event, regex) => {
 };
 const res_arufofo_agete = (event, regex) => {
   //特定のKINDに空ポス
-  console.log(event.id);
+  log(event.id);
   const tags = [
     [
       "r",
@@ -548,7 +553,7 @@ const res_arufofo_douzo = (event, regex) => {
     throw new Error();
   }
   const npub_reply = match[1];
-  console.log(match);
+  log(match);
   const npub_reply_decode = nip19.decode(npub_reply);
   if (npub_reply_decode.type !== "npub") {
     throw new TypeError(`${npub_reply} is not npub`);
@@ -607,7 +612,7 @@ const res_monoGazo_add = async (event, regex) => {
 
   // nostr: プレフィックスを除去
   const identifier = rawIdentifier.replace(/^nostr:/, "");
-  console.log("add identifier:", identifier, "imageNum:", imageNum);
+  log("add identifier:", identifier, "imageNum:", imageNum);
 
   try {
     // nevent/note をデコード
@@ -625,7 +630,7 @@ const res_monoGazo_add = async (event, regex) => {
 
     // イベントを取得
     const receivedEvent = await getEventById(eventId);
-    console.log("イベント取得完了:", receivedEvent.id);
+    log("イベント取得完了:", receivedEvent.id);
 
     // 画像URLを抽出
     const imageUrls = getUrls(receivedEvent.content);
@@ -662,7 +667,7 @@ const res_monoGazo_add = async (event, regex) => {
       );
     } else {
       // 複数画像 → 選択を求める
-      console.log("複数画像検出:", imageUrls.length, "枚");
+      log("複数画像検出:", imageUrls.length, "枚");
       await postImageSelectionRequest(
         imageUrls,
         receivedEvent,
@@ -673,7 +678,7 @@ const res_monoGazo_add = async (event, regex) => {
       );
     }
   } catch (error) {
-    console.error("add処理エラー:", error);
+    error("add処理エラー:", error);
     postRepEvent(
       event,
       `処理に失敗しました ₍ xᴗx ₎\n${error.message || error}`,
@@ -743,13 +748,13 @@ async function addMonogazoList(newData, event) {
       // git pushで反映
       await gitPush(event, newData);
     } catch (error) {
-      console.error("gitPush error:", error);
+      error("gitPush error:", error);
       // エラー時に確認メッセージ送信
       if (event) postRepEvent(event, "₍ ･ᴗx ₎", []);
       else postEvent(1, "₍ ･ᴗx ₎", []);
     }
   } catch (error) {
-    console.error("writeFile error:", error);
+    error("writeFile error:", error);
     if (event) postRepEvent(event, "₍ xᴗx ₎", []);
     else postEvent(1, "₍ xᴗx ₎", []);
   }
@@ -792,7 +797,7 @@ const res_monoGazo_delete = async (event, regex) => {
         try {
           await gitPush(event);
         } catch (error) {
-          console.log(error);
+          log(error);
           postRepEvent(event, "₍ ･ᴗx ₎", []);
         }
       } catch (error) {
@@ -813,22 +818,22 @@ export const res_vs_random = async (event, regex) => {
       .split("vs")
       .filter((value) => value.trim() !== ""); // vsで分割して配列に格納し、空の文字列をフィルタリング
     // vsで分割して配列に格納
-    console.log(vsMatches);
+    log(vsMatches);
     if (vsMatches.length <= 0) {
       return;
     }
     const randomIndex = Math.floor(Math.random() * vsMatches.length);
     const message = vsMatches[randomIndex];
-    console.log(message);
+    log(message);
     //絵文字があるかもしれない。
     const tags = event.tags.filter((item) => item[0] === "emoji");
-    console.log(tags);
+    log(tags);
     postRepEvent(event, message, tags);
   }
 };
 
 export const res_randomNip = async (event, regex) => {
-  console.log("ランダムNIP");
+  log("ランダムNIP");
   const randomIndex = Math.floor(Math.random() * 100)
     .toString()
     .padStart(2, "0"); // 00~99
@@ -837,7 +842,7 @@ export const res_randomNip = async (event, regex) => {
 };
 
 export const res_randomHoukou = async (event, regex) => {
-  console.log("ランダム方向");
+  log("ランダム方向");
   const houkou = ["→", "↗", "↑", "↖", "←", "↙", "↓", "↘"];
   const content = houkou[Math.floor(Math.random() * houkou.length)];
 
@@ -915,7 +920,7 @@ const res_image_selection = async (event, regex) => {
     // 選択データを削除
     pendingImageSelections.delete(selectionKey);
   } catch (error) {
-    console.error("画像追加エラー:", error);
+    error("画像追加エラー:", error);
     postRepEvent(event, "画像の追加に失敗しました ₍ xᴗx ₎", []);
   }
 };
@@ -972,13 +977,13 @@ function getEventById(eventId) {
       .pipe(completeOnTimeout(2000))
       .subscribe({
         next: (packet) => {
-          //console.log("Received:", packet);
+          //log("Received:", packet);
           if (packet.event) {
             receivedEvent = packet.event;
           }
         },
         complete: () => {
-          console.log("Completed!");
+          log("Completed!");
           if (receivedEvent) {
             resolve(receivedEvent);
           } else {
@@ -986,7 +991,7 @@ function getEventById(eventId) {
           }
         },
         error: (err) => {
-          console.error("Error:", err);
+          error("Error:", err);
           if (receivedEvent) {
             resolve(receivedEvent);
           } else {
@@ -1075,7 +1080,7 @@ setInterval(
 
     for (const [eventId, data] of pendingImageSelections.entries()) {
       if (now - data.timestamp > EXPIRY_TIME) {
-        console.log(`期限切れの選択データを削除: ${eventId}`);
+        log(`期限切れの選択データを削除: ${eventId}`);
         pendingImageSelections.delete(eventId);
       }
     }
