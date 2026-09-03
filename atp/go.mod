@@ -4,7 +4,7 @@ go 1.25.7
 
 require (
 	github.com/bluesky-social/indigo v0.0.0-20250813051257-8be102876fb7
-	github.com/gorilla/websocket v1.5.1
+	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 )
 
